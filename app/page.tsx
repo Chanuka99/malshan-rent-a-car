@@ -1,65 +1,243 @@
-import Image from "next/image";
+import Link from 'next/link'
+import Image from 'next/image'
+import { Shield, Clock, MapPin, ArrowRight, Star, ChevronRight, Car } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { CarCard } from '@/components/CarCard'
+import { createClient } from '@/lib/supabase/server'
+import { HeroBookingWidget } from '@/components/HeroBookingWidget'
 
-export default function Home() {
+export default async function HomePage() {
+  const supabase = await createClient()
+
+  const { data: featuredCars } = await supabase
+    .from('cars')
+    .select('*')
+    .eq('available', true)
+    .order('created_at', { ascending: false })
+    .limit(4)
+
+  const cars = featuredCars ?? []
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <>
+      {/* ── HERO ──────────────────────────────────────────────── */}
+      <section className="relative h-[92vh] min-h-[600px] flex items-center justify-center overflow-hidden">
+        {/* Background */}
+        <div className="absolute inset-0">
+          <Image
+            src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1920&q=80"
+            alt="Luxury car on road"
+            fill
+            priority
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/50 to-black/30" />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
+            {/* Headline */}
+            <div className="flex-1 text-white max-w-2xl">
+              <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm rounded-full px-4 py-2 mb-6 border border-white/20">
+                <Star size={14} className="text-yellow-400 fill-yellow-400" />
+                <span className="text-sm text-white/90 font-medium">Colombo&apos;s Most Trusted Car Rental</span>
+              </div>
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight mb-6 tracking-tight">
+                Drive Your Way
+                <br />
+                <span className="text-brand">Through Colombo</span>
+              </h1>
+              <p className="text-lg text-white/80 leading-relaxed mb-8 max-w-lg">
+                Premium vehicles, transparent pricing, and seamless booking. Experience
+                Colombo on your terms with Malshan Rent A Car.
+              </p>
+              <div className="flex items-center gap-6 text-sm text-white/70">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-green-400" />
+                  No hidden fees
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-green-400" />
+                  Free cancellation
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-green-400" />
+                  24/7 support
+                </div>
+              </div>
+            </div>
+
+            {/* Booking Widget */}
+            <div className="w-full lg:w-auto lg:min-w-[380px]">
+              <HeroBookingWidget />
+            </div>
+          </div>
+        </div>
+
+        {/* Scroll indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/50 animate-bounce">
+          <div className="w-5 h-8 border border-white/30 rounded-full flex items-start justify-center pt-1.5">
+            <div className="w-1 h-2 bg-white/50 rounded-full" />
+          </div>
+        </div>
+      </section>
+
+      {/* ── FLEET SECTION ─────────────────────────────────────── */}
+      <section className="section-padding bg-white" id="fleet">
+        <div className="container-max">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-12 gap-4">
+            <div>
+              <p className="text-brand text-sm font-semibold tracking-widest uppercase mb-2">
+                Our Fleet
+              </p>
+              <h2 className="text-4xl font-bold text-gray-900">
+                Featured Vehicles
+              </h2>
+              <p className="text-gray-500 mt-2 max-w-md">
+                From city commuters to spacious SUVs — find the perfect car for every journey.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              className="border-brand text-brand hover:bg-brand hover:text-white flex items-center gap-2 group shrink-0"
+              render={
+                <Link href="/cars">
+                  View All Cars
+                  <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                </Link>
+              }
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          </div>
+
+          {cars.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {cars.map((car) => (
+                <CarCard key={car.id} car={car} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-16">
+              <Car size={48} className="text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-500">No cars available at the moment. Check back soon!</p>
+            </div>
+          )}
         </div>
-      </main>
-    </div>
-  );
+      </section>
+
+      {/* ── WHY CHOOSE US ─────────────────────────────────────── */}
+      <section className="section-padding bg-gray-50" id="about">
+        <div className="container-max">
+          <div className="text-center mb-16">
+            <p className="text-brand text-sm font-semibold tracking-widest uppercase mb-2">
+              Why Malshan Rent A Car
+            </p>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              The Smart Way to Rent
+            </h2>
+            <p className="text-gray-500 max-w-lg mx-auto">
+              We&apos;ve redesigned car rental to be simple, transparent, and enjoyable.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                Icon: Shield,
+                title: 'Fully Insured Vehicles',
+                description:
+                  'Every car in our fleet is fully insured and regularly serviced. Drive with complete peace of mind.',
+                color: 'bg-blue-50 text-blue-600',
+              },
+              {
+                Icon: Clock,
+                title: 'Flexible Rental Periods',
+                description:
+                  'Rent by the day, week, or month. Pickup and drop-off at your convenience.',
+                color: 'bg-green-50 text-green-600',
+              },
+              {
+                Icon: MapPin,
+                title: 'Colombo-Wide Coverage',
+                description:
+                  'Multiple pickup locations across Colombo. We bring the car to you — no extra charge.',
+                color: 'bg-red-50 text-brand',
+              },
+            ].map(({ Icon, title, description, color }) => (
+              <div
+                key={title}
+                className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200"
+              >
+                <div className={`w-14 h-14 rounded-xl ${color} flex items-center justify-center mb-6`}>
+                  <Icon size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{title}</h3>
+                <p className="text-gray-500 leading-relaxed text-sm">{description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── DEALS BANNER ──────────────────────────────────────── */}
+      <section className="section-padding" id="deals">
+        <div className="container-max">
+          <div className="relative bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 rounded-3xl overflow-hidden">
+            {/* Decorative elements */}
+            <div className="absolute top-0 right-0 w-96 h-96 bg-brand/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-brand/10 rounded-full blur-2xl translate-y-1/4 -translate-x-1/4" />
+
+            <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8 p-10 lg:p-16">
+              <div className="text-center lg:text-left">
+                <div className="inline-flex items-center gap-2 bg-brand/20 text-brand border border-brand/30 rounded-full px-4 py-1.5 mb-4 text-sm font-medium">
+                  🎉 Limited Time Offer
+                </div>
+                <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
+                  Get <span className="text-brand">20% Off</span>
+                  <br />
+                  Your First Rental
+                </h2>
+                <p className="text-gray-400 text-lg max-w-md">
+                  New to Malshan Rent A Car? Sign up today and enjoy 20% off your first booking.
+                  No promo code needed — discount applied automatically.
+                </p>
+              </div>
+
+              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8 text-center min-w-[260px]">
+                <div className="text-6xl font-black text-white mb-2">20%</div>
+                <div className="text-gray-300 text-sm mb-6">First booking discount</div>
+                <Button
+                  className="bg-brand hover:bg-brand-dark text-white font-semibold w-full"
+                  render={
+                    <Link href="/auth/register">Claim Your Discount</Link>
+                  }
+                />
+                <p className="text-gray-500 text-xs mt-3">
+                  Valid for new accounts only. Limited time.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── STATS ROW ─────────────────────────────────────────── */}
+      <section className="py-16 bg-brand" id="contact">
+        <div className="container-max px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-white text-center">
+            {[
+              { number: '500+', label: 'Happy Customers' },
+              { number: '50+', label: 'Vehicles Available' },
+              { number: '4.9★', label: 'Average Rating' },
+              { number: '24/7', label: 'Customer Support' },
+            ].map(({ number, label }) => (
+              <div key={label}>
+                <div className="text-4xl font-bold mb-1">{number}</div>
+                <div className="text-white/70 text-sm">{label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    </>
+  )
 }

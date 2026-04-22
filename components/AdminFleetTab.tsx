@@ -1,0 +1,383 @@
+'use client'
+
+import { useState } from 'react'
+import Image from 'next/image'
+import { Plus, Pencil, Trash2, Car as CarIcon } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { CarSchema, type CarInput } from '@/lib/validations'
+import { addCarAction, updateCarAction, deleteCarAction, uploadCarImageAction } from '@/app/actions/admin'
+import { formatCurrency } from '@/lib/utils'
+import { useRouter } from 'next/navigation'
+import type { Car } from '@/types/supabase'
+
+interface AdminFleetTabProps {
+  initialCars: Car[]
+}
+
+export function AdminFleetTab({ initialCars }: AdminFleetTabProps) {
+  const [cars, setCars] = useState<Car[]>(initialCars)
+  const [editingCar, setEditingCar] = useState<Car | null>(null)
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [imageUrls, setImageUrls] = useState<string[]>([])
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    formState: { errors },
+  } = useForm<CarInput>({ resolver: zodResolver(CarSchema) })
+
+  function openAdd() {
+    setEditingCar(null)
+    setImageUrls([])
+    reset({})
+    setSheetOpen(true)
+  }
+
+  function openEdit(car: Car) {
+    setEditingCar(car)
+    setImageUrls(car.images)
+    reset({
+      name: car.name,
+      brand: car.brand,
+      model: car.model,
+      year: car.year,
+      type: car.type,
+      seats: car.seats,
+      transmission: car.transmission,
+      fuelType: car.fuel_type,
+      pricePerDay: car.price_per_day,
+      description: car.description ?? '',
+    })
+    setSheetOpen(true)
+  }
+
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    const result = await uploadCarImageAction(file)
+    if ('url' in result) {
+      setImageUrls((prev) => [...prev, result.url])
+    }
+    setUploading(false)
+  }
+
+  async function onSubmit(data: CarInput) {
+    setSubmitting(true)
+    setError(null)
+    let result
+    if (editingCar) {
+      result = await updateCarAction(editingCar.id, { ...data, images: imageUrls, available: editingCar.available })
+    } else {
+      result = await addCarAction({ ...data, images: imageUrls })
+    }
+    if (result?.error) {
+      setError(result.error)
+    } else {
+      setSheetOpen(false)
+      router.refresh()
+    }
+    setSubmitting(false)
+  }
+
+  async function handleDelete(carId: string) {
+    if (!confirm('Are you sure you want to delete this car?')) return
+    await deleteCarAction(carId)
+    setCars((prev) => prev.filter((c) => c.id !== carId))
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="font-bold text-gray-900">Fleet Management</h2>
+        <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+          <SheetTrigger
+            render={
+              <Button
+                className="bg-brand hover:bg-brand-dark text-white flex items-center gap-2"
+                onClick={openAdd}
+              >
+                <Plus size={16} />
+                Add Car
+              </Button>
+            }
+          />
+          <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
+            <SheetHeader>
+              <SheetTitle>{editingCar ? 'Edit Car' : 'Add New Car'}</SheetTitle>
+            </SheetHeader>
+
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-6">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="name">Car Name</Label>
+                  <Input id="name" className="mt-1" {...register('name')} />
+                  {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>}
+                </div>
+                <div>
+                  <Label htmlFor="brand">Brand</Label>
+                  <Input id="brand" className="mt-1" {...register('brand')} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="model">Model</Label>
+                  <Input id="model" className="mt-1" {...register('model')} />
+                </div>
+                <div>
+                  <Label htmlFor="year">Year</Label>
+                  <Input
+                    id="year"
+                    type="number"
+                    className="mt-1"
+                    {...register('year', { valueAsNumber: true })}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Type</Label>
+                  <Controller
+                    control={control}
+                    name="type"
+                    render={({ field }) => (
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="economy">Economy</SelectItem>
+                          <SelectItem value="suv">SUV</SelectItem>
+                          <SelectItem value="luxury">Luxury</SelectItem>
+                          <SelectItem value="van">Van</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="seats">Seats</Label>
+                  <Input
+                    id="seats"
+                    type="number"
+                    className="mt-1"
+                    {...register('seats', { valueAsNumber: true })}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Transmission</Label>
+                  <Controller
+                    control={control}
+                    name="transmission"
+                    render={({ field }) => (
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="auto">Automatic</SelectItem>
+                          <SelectItem value="manual">Manual</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
+                <div>
+                  <Label>Fuel Type</Label>
+                  <Controller
+                    control={control}
+                    name="fuelType"
+                    render={({ field }) => (
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="petrol">Petrol</SelectItem>
+                          <SelectItem value="diesel">Diesel</SelectItem>
+                          <SelectItem value="electric">Electric</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="pricePerDay">Price per Day (LKR)</Label>
+                <Input
+                  id="pricePerDay"
+                  type="number"
+                  className="mt-1"
+                  {...register('pricePerDay', { valueAsNumber: true })}
+                />
+                {errors.pricePerDay && <p className="text-xs text-red-500 mt-1">{errors.pricePerDay.message}</p>}
+              </div>
+
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  rows={3}
+                  className="mt-1"
+                  {...register('description')}
+                />
+              </div>
+
+              {/* Image Upload */}
+              <div>
+                <Label>Images</Label>
+                <div className="mt-1 border-2 border-dashed border-gray-200 rounded-lg p-4">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    id="imageUpload"
+                  />
+                  <label
+                    htmlFor="imageUpload"
+                    className="cursor-pointer flex flex-col items-center text-sm text-gray-500 hover:text-brand"
+                  >
+                    {uploading ? (
+                      <div className="w-5 h-5 border-2 border-brand border-t-transparent rounded-full animate-spin mx-auto" />
+                    ) : (
+                      <Plus size={20} className="mb-1" />
+                    )}
+                    {uploading ? 'Uploading...' : 'Click to upload image'}
+                  </label>
+                </div>
+                {imageUrls.length > 0 && (
+                  <div className="flex gap-2 mt-2 flex-wrap">
+                    {imageUrls.map((url, i) => (
+                      <div key={i} className="relative w-16 h-16 rounded-md overflow-hidden border border-gray-200">
+                        <Image src={url} alt="" fill className="object-cover" sizes="64px" />
+                        <button
+                          type="button"
+                          onClick={() => setImageUrls((prev) => prev.filter((_, idx) => idx !== i))}
+                          className="absolute top-0 right-0 bg-red-500 text-white w-4 h-4 flex items-center justify-center text-xs leading-none"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {error && <p className="text-sm text-red-500">{error}</p>}
+
+              <Button
+                type="submit"
+                className="w-full bg-brand hover:bg-brand-dark text-white"
+                disabled={submitting}
+              >
+                {submitting ? (
+                  <span className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Saving...
+                  </span>
+                ) : editingCar ? 'Update Car' : 'Add Car'}
+              </Button>
+            </form>
+          </SheetContent>
+        </Sheet>
+      </div>
+
+      <div className="overflow-x-auto rounded-xl border border-gray-200">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="bg-gray-50 border-b border-gray-200">
+              {['Car', 'Type', 'Seats', 'Transmission', 'Fuel', 'Price/Day', 'Status', 'Actions'].map((h) => (
+                <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100">
+            {initialCars.length === 0 ? (
+              <tr>
+                <td colSpan={8} className="text-center py-12 text-gray-400">
+                  <CarIcon size={32} className="mx-auto mb-2 text-gray-300" />
+                  No cars yet. Add your first car!
+                </td>
+              </tr>
+            ) : (
+              initialCars.map((car) => (
+                <tr key={car.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="relative w-12 h-9 rounded-md overflow-hidden bg-gray-100 shrink-0">
+                        {car.images?.[0] ? (
+                          <Image src={car.images[0]} alt={car.name} fill className="object-cover" sizes="48px" />
+                        ) : (
+                          <CarIcon size={16} className="text-gray-400 m-auto absolute inset-0" />
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900">{car.name}</p>
+                        <p className="text-xs text-gray-500">{car.brand} {car.model} · {car.year}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 capitalize">{car.type}</td>
+                  <td className="px-4 py-3">{car.seats}</td>
+                  <td className="px-4 py-3 capitalize">{car.transmission}</td>
+                  <td className="px-4 py-3 capitalize">{car.fuel_type}</td>
+                  <td className="px-4 py-3 font-semibold text-brand">{formatCurrency(car.price_per_day)}</td>
+                  <td className="px-4 py-3">
+                    <Badge className={car.available ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'} variant="secondary">
+                      {car.available ? 'Available' : 'Unavailable'}
+                    </Badge>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => openEdit(car)}>
+                        <Pencil size={14} />
+                      </Button>
+                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50" onClick={() => handleDelete(car.id)}>
+                        <Trash2 size={14} />
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
