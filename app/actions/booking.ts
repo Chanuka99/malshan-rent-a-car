@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { sendBookingConfirmationEmail } from '@/lib/email'
 import { BookingSchema } from '@/lib/validations'
 import { calculateDays } from '@/lib/utils'
+import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
 interface CreateBookingPayload {
@@ -100,5 +101,8 @@ export async function cancelBookingAction(bookingId: string) {
     return { error: error.message }
   }
 
+  revalidatePath('/dashboard')
+  revalidatePath('/admin')
+  revalidatePath('/cars')
   return { success: true }
 }

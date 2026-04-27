@@ -21,7 +21,7 @@ export default async function HomePage() {
   return (
     <>
       {/* ── HERO ──────────────────────────────────────────────── */}
-      <section className="relative h-[92vh] min-h-[600px] flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-[100vh] lg:h-[92vh] flex items-center justify-center overflow-hidden py-20 lg:py-0">
         {/* Background */}
         <div className="absolute inset-0">
           <Image
@@ -31,27 +31,27 @@ export default async function HomePage() {
             priority
             className="object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/50 to-black/30" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-black/40" />
         </div>
 
         <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-10 lg:gap-12">
             {/* Headline */}
-            <div className="flex-1 text-white max-w-2xl">
+            <div className="text-center lg:text-left flex-1 text-white max-w-2xl">
               <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm rounded-full px-4 py-2 mb-6 border border-white/20">
                 <Star size={14} className="text-yellow-400 fill-yellow-400" />
-                <span className="text-sm text-white/90 font-medium">Colombo&apos;s Most Trusted Car Rental</span>
+                <span className="text-xs sm:text-sm text-white/90 font-medium">Colombo&apos;s Most Trusted Car Rental</span>
               </div>
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight mb-6 tracking-tight">
+              <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold leading-tight mb-6 tracking-tight">
                 Drive Your Way
                 <br />
                 <span className="text-brand">Through Colombo</span>
               </h1>
-              <p className="text-lg text-white/80 leading-relaxed mb-8 max-w-lg">
+              <p className="text-base sm:text-lg text-white/80 leading-relaxed mb-8 max-w-lg mx-auto lg:mx-0">
                 Premium vehicles, transparent pricing, and seamless booking. Experience
                 Colombo on your terms with Malshan Rent A Car.
               </p>
-              <div className="flex items-center gap-6 text-sm text-white/70">
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 sm:gap-6 text-xs text-white/70">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-green-400" />
                   No hidden fees
@@ -68,7 +68,7 @@ export default async function HomePage() {
             </div>
 
             {/* Booking Widget */}
-            <div className="w-full lg:w-auto lg:min-w-[380px]">
+            <div className="w-full sm:max-w-[420px] lg:w-auto lg:min-w-[380px]">
               <HeroBookingWidget />
             </div>
           </div>
@@ -178,8 +178,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── DEALS BANNER ──────────────────────────────────────── */}
-      <section className="section-padding" id="deals">
+      {/* ── PREMIUM EXPERIENCE ──────────────────────────────────────── */}
+      <section className="section-padding" id="experience">
         <div className="container-max">
           <div className="relative bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 rounded-3xl overflow-hidden">
             {/* Decorative elements */}
@@ -189,31 +189,26 @@ export default async function HomePage() {
             <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8 p-10 lg:p-16">
               <div className="text-center lg:text-left">
                 <div className="inline-flex items-center gap-2 bg-brand/20 text-brand border border-brand/30 rounded-full px-4 py-1.5 mb-4 text-sm font-medium">
-                  🎉 Limited Time Offer
+                  Premium Experience
                 </div>
                 <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
-                  Get <span className="text-brand">20% Off</span>
-                  <br />
-                  Your First Rental
+                  Your Journey, Our <span className="text-brand">Commitment</span>
                 </h2>
                 <p className="text-gray-400 text-lg max-w-md">
-                  New to Malshan Rent A Car? Sign up today and enjoy 20% off your first booking.
-                  No promo code needed — discount applied automatically.
+                  Experience the ultimate in vehicle rental. From luxury sedans to spacious SUVs,
+                  we provide well-maintained vehicles and exceptional service for every mile of your journey.
                 </p>
               </div>
 
-              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8 text-center min-w-[260px]">
-                <div className="text-6xl font-black text-white mb-2">20%</div>
-                <div className="text-gray-300 text-sm mb-6">First booking discount</div>
-                <Button
-                  className="bg-brand hover:bg-brand-dark text-white font-semibold w-full"
-                  render={
-                    <Link href="/auth/register">Claim Your Discount</Link>
-                  }
-                />
-                <p className="text-gray-500 text-xs mt-3">
-                  Valid for new accounts only. Limited time.
-                </p>
+              <div className="flex flex-col gap-4 min-w-[260px]">
+                <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
+                  <div className="text-brand font-bold text-xl mb-1">24/7 Support</div>
+                  <p className="text-gray-400 text-sm">Dedicated assistance for any situation during your rental.</p>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
+                  <div className="text-brand font-bold text-xl mb-1">Pristine Fleet</div>
+                  <p className="text-gray-400 text-sm">Every vehicle is rigorously inspected and cleaned for your safety.</p>
+                </div>
               </div>
             </div>
           </div>
@@ -226,7 +221,7 @@ export default async function HomePage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-white text-center">
             {[
               { number: '500+', label: 'Happy Customers' },
-              { number: '50+', label: 'Vehicles Available' },
+              { number: '100+', label: 'Vehicles Available' },
               { number: '4.9★', label: 'Average Rating' },
               { number: '24/7', label: 'Customer Support' },
             ].map(({ number, label }) => (

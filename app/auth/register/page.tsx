@@ -27,7 +27,8 @@ export default function RegisterPage() {
     setIsLoading(true)
     setServerError(null)
     const formData = new FormData()
-    formData.append('fullName', data.fullName)
+    formData.append('firstName', data.firstName)
+    formData.append('lastName', data.lastName)
     formData.append('email', data.email)
     formData.append('phone', data.phone)
     formData.append('password', data.password)
@@ -85,20 +86,37 @@ export default function RegisterPage() {
           </p>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            <div>
-              <Label htmlFor="fullName">Full Name</Label>
-              <div className="relative mt-1">
-                <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <Input
-                  id="fullName"
-                  placeholder="John Silva"
-                  className="pl-9"
-                  {...register('fullName')}
-                />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="firstName">First Name</Label>
+                <div className="relative mt-1">
+                  <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <Input
+                    id="firstName"
+                    placeholder="John"
+                    className="pl-9"
+                    {...register('firstName')}
+                  />
+                </div>
+                {errors.firstName && (
+                  <p className="text-xs text-red-500 mt-1">{errors.firstName.message}</p>
+                )}
               </div>
-              {errors.fullName && (
-                <p className="text-xs text-red-500 mt-1">{errors.fullName.message}</p>
-              )}
+              <div>
+                <Label htmlFor="lastName">Last Name</Label>
+                <div className="relative mt-1">
+                  <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <Input
+                    id="lastName"
+                    placeholder="Silva"
+                    className="pl-9"
+                    {...register('lastName')}
+                  />
+                </div>
+                {errors.lastName && (
+                  <p className="text-xs text-red-500 mt-1">{errors.lastName.message}</p>
+                )}
+              </div>
             </div>
 
             <div>

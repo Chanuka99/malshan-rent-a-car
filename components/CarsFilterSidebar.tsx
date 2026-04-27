@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
-import { useCallback } from 'react'
+import { useCallback, useState, useEffect } from 'react'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Slider } from '@/components/ui/slider'
@@ -41,6 +41,22 @@ export function CarsFilterSidebar({ currentFilters }: FiltersProps) {
     },
     [router, pathname, searchParams]
   )
+
+  const urlMaxPrice = parseInt(currentFilters.maxPrice || '100000')
+  const [localMaxPrice, setLocalMaxPrice] = useState(urlMaxPrice)
+
+  useEffect(() => {
+    setLocalMaxPrice(urlMaxPrice)
+  }, [urlMaxPrice])
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      if (localMaxPrice !== urlMaxPrice) {
+        updateFilter('maxPrice', String(localMaxPrice))
+      }
+    }, 300)
+    return () => clearTimeout(handler)
+  }, [localMaxPrice, updateFilter, urlMaxPrice])
 
   function handleTypeToggle(type: string, checked: boolean) {
     const currentTypes = currentFilters.type?.split(',').filter(Boolean) ?? []
@@ -193,17 +209,17 @@ export function CarsFilterSidebar({ currentFilters }: FiltersProps) {
             Max Price / Day
           </Label>
           <span className="text-sm font-bold text-brand">
-            LKR {maxPrice.toLocaleString()}
+            LKR {localMaxPrice.toLocaleString()}
           </span>
         </div>
         <Slider
           min={5000}
           max={100000}
           step={5000}
-          value={[maxPrice]}
+          value={[localMaxPrice]}
           onValueChange={(val) => {
             const value = Array.isArray(val) ? val[0] : val
-            updateFilter('maxPrice', String(value))
+            setLocalMaxPrice(value)
           }}
           className="[&_[role=slider]]:bg-brand [&_[role=slider]]:border-brand"
         />

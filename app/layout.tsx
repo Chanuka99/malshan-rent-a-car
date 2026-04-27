@@ -17,11 +17,11 @@ export const metadata: Metadata = {
     template: '%s | Malshan Rent A Car',
   },
   description:
-    'Rent quality cars in Colombo, Sri Lanka. Economy, SUV, Luxury, and Van rentals available. Easy booking, transparent pricing.',
-  keywords: ['car rental', 'Colombo', 'Sri Lanka', 'Malshan Rent A Car', 'vehicle hire'],
+    'Rent quality cars in Pannipitiya, Sri Lanka. Economy, SUV, Luxury, and Van rentals available. Easy booking, transparent pricing.',
+  keywords: 'car rental sri lanka, rent a car pannipitiya, luxury car rental colombo, van rental sri lanka, malshan rent a car',
   openGraph: {
-    title: 'Malshan Rent A Car — Car Rental Colombo',
-    description: 'Rent quality cars in Colombo, Sri Lanka.',
+    title: 'Malshan Rent A Car | Premium Vehicle Rentals',
+    description: 'Rent quality cars in Pannipitiya, Sri Lanka.',
     type: 'website',
   },
 }

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Car, Phone, Mail, MapPin, Globe, MessageCircle, Camera, Share2 } from 'lucide-react'
 
 const footerLinks = {
@@ -37,12 +38,12 @@ export function Footer() {
             <div className="space-y-3">
               <div className="flex items-center gap-3 text-sm text-gray-400">
                 <MapPin size={16} className="text-brand shrink-0" />
-                <span>Colombo, Sri Lanka</span>
+                <span>135/2, Arawwala rd, Pannipitiya</span>
               </div>
               <div className="flex items-center gap-3 text-sm text-gray-400">
                 <Phone size={16} className="text-brand shrink-0" />
-                <a href="tel:+94112345678" className="hover:text-white transition-colors">
-                  +94 11 234 5678
+                <a href="tel:0762098120" className="hover:text-white transition-colors">
+                  076 209 8120 (Hotline)
                 </a>
               </div>
               <div className="flex items-center gap-3 text-sm text-gray-400">

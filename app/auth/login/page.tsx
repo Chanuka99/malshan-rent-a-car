@@ -72,51 +72,28 @@ export default function LoginPage() {
             </Link>
           </p>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <form action={async (formData) => {
+            setIsLoading(true)
+            setServerError(null)
+            const result = await loginAction(formData)
+            if (result?.error) {
+              setServerError(result.error)
+              setIsLoading(false)
+            }
+          }} className="space-y-5">
             <div>
               <Label htmlFor="email">Email address</Label>
               <div className="relative mt-1">
                 <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <Input
                   id="email"
+                  name="email"
                   type="email"
                   placeholder="you@example.com"
                   className="pl-9"
-                  {...register('email')}
+                  required
                 />
               </div>
-              {errors.email && (
-                <p className="text-xs text-red-500 mt-1">{errors.email.message}</p>
-              )}
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
-                <Link href="#" className="text-xs text-brand hover:underline">
-                  Forgot password?
-                </Link>
-              </div>
-              <div className="relative mt-1">
-                <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
-                  className="pl-9 pr-10"
-                  {...register('password')}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              </div>
-              {errors.password && (
-                <p className="text-xs text-red-500 mt-1">{errors.password.message}</p>
-              )}
             </div>
 
             {serverError && (
@@ -133,10 +110,10 @@ export default function LoginPage() {
               {isLoading ? (
                 <span className="flex items-center gap-2">
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Signing in...
+                  Sending code...
                 </span>
               ) : (
-                'Sign In'
+                'Send Verification Code'
               )}
             </Button>
           </form>

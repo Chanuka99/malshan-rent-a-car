@@ -1,7 +1,15 @@
-import { Car as CarIcon } from 'lucide-react'
+import { Car as CarIcon, SlidersHorizontal } from 'lucide-react'
 import { CarCard } from '@/components/CarCard'
 import { CarsFilterSidebar } from '@/components/CarsFilterSidebar'
 import { createClient } from '@/lib/supabase/server'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet'
+import { Button } from '@/components/ui/button'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -59,24 +67,52 @@ export default async function CarsPage({ searchParams }: CarsPageProps) {
     <div className="min-h-screen bg-gray-50">
       {/* Page header */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <p className="text-brand text-sm font-semibold tracking-widest uppercase mb-1">
-            Our Fleet
-          </p>
-          <h1 className="text-4xl font-bold text-gray-900">Available Cars</h1>
-          <p className="text-gray-500 mt-2">
-            {cars?.length ?? 0} vehicle{(cars?.length ?? 0) !== 1 ? 's' : ''} available
-            {params.pickup && params.dropoff
-              ? ` · ${new Date(params.pickup).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} → ${new Date(params.dropoff).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`
-              : ''}
-          </p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+            <div>
+              <p className="text-brand text-sm font-semibold tracking-widest uppercase mb-1">
+                Our Fleet
+              </p>
+              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">Available Cars</h1>
+              <p className="text-gray-500 mt-2 text-sm sm:text-base">
+                {cars?.length ?? 0} vehicle{(cars?.length ?? 0) !== 1 ? 's' : ''} available
+                {params.pickup && params.dropoff
+                  ? ` · ${new Date(params.pickup).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} → ${new Date(params.dropoff).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`
+                  : ''}
+              </p>
+            </div>
+
+            {/* Mobile Filter Button */}
+            <div className="lg:hidden">
+              <Sheet>
+                <SheetTrigger
+                  render={
+                    <Button variant="outline" className="w-full flex items-center gap-2 h-11 border-gray-200">
+                      <SlidersHorizontal size={16} />
+                      Filter & Sort
+                    </Button>
+                  }
+                />
+                <SheetContent side="right" className="p-0 border-none w-[85vw] sm:w-[400px]">
+                  <div className="h-full overflow-y-auto">
+                    <div className="p-6">
+                      <SheetHeader className="mb-6">
+                        <SheetTitle>Filter Vehicles</SheetTitle>
+                      </SheetHeader>
+                      <CarsFilterSidebar currentFilters={params} />
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
+          </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar Filters */}
-          <aside className="w-full lg:w-72 shrink-0">
+          {/* Desktop Sidebar Filters */}
+          <aside className="hidden lg:block w-72 shrink-0">
             <CarsFilterSidebar currentFilters={params} />
           </aside>
 

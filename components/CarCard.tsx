@@ -32,7 +32,7 @@ export function CarCard({ car }: CarCardProps) {
   return (
     <Card className="group overflow-hidden border border-gray-100 card-hover shadow-sm">
       {/* Image */}
-      <div className="relative h-52 overflow-hidden bg-gray-100">
+      <div className="relative h-48 sm:h-52 overflow-hidden bg-gray-100">
         <Image
           src={imageUrl}
           alt={car.name}

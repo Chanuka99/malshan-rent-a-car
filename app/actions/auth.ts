@@ -5,29 +5,31 @@ import { redirect } from 'next/navigation'
 import { LoginSchema, RegisterSchema } from '@/lib/validations'
 
 export async function loginAction(formData: FormData) {
-  const raw = {
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
-  }
+  const email = formData.get('email') as string
 
-  const parsed = LoginSchema.safeParse(raw)
-  if (!parsed.success) {
-    return { error: parsed.error.issues[0].message }
+  if (!email) {
+    return { error: 'Email is required' }
   }
 
   const supabase = await createClient()
-  const { error } = await supabase.auth.signInWithPassword(parsed.data)
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: {
+      shouldCreateUser: false,
+    },
+  })
 
   if (error) {
     return { error: error.message }
   }
 
-  redirect('/dashboard')
+  redirect(`/auth/verify?email=${encodeURIComponent(email)}`)
 }
 
 export async function registerAction(formData: FormData) {
   const raw = {
-    fullName: formData.get('fullName') as string,
+    firstName: formData.get('firstName') as string,
+    lastName: formData.get('lastName') as string,
     email: formData.get('email') as string,
     phone: formData.get('phone') as string,
     password: formData.get('password') as string,
@@ -41,26 +43,49 @@ export async function registerAction(formData: FormData) {
 
   const supabase = await createClient()
 
-  const { data: authData, error: signUpError } = await supabase.auth.signUp({
+  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
+    options: {
+      data: {
+        full_name: `${parsed.data.firstName} ${parsed.data.lastName}`.trim(),
+        phone: parsed.data.phone,
+      },
+    },
   })
 
   if (signUpError) {
     return { error: signUpError.message }
   }
 
-  if (authData.user) {
-    const { error: profileError } = await supabase.from('profiles').insert({
-      id: authData.user.id,
-      full_name: parsed.data.fullName,
-      phone: parsed.data.phone,
-      role: 'user',
-    })
+  // Supabase returns success but empty identities if the user already exists
+  // when "Prevent Email Enumeration" is turned on in settings.
+  if (signUpData.user && signUpData.user.identities && signUpData.user.identities.length === 0) {
+    return { error: 'An account with this email already exists. Please sign in instead.' }
+  }
 
-    if (profileError) {
-      return { error: profileError.message }
-    }
+  // Redirect to OTP verify page with email as query param
+  redirect(`/auth/verify?email=${encodeURIComponent(parsed.data.email)}`)
+}
+
+export async function verifyOtpAction(formData: FormData) {
+  const email = formData.get('email') as string
+  const token = formData.get('token') as string
+
+  if (!email || !token || token.length !== 8) {
+    return { error: 'Please enter the 8-digit code from your email.' }
+  }
+
+  const supabase = await createClient()
+
+  const { error } = await supabase.auth.verifyOtp({
+    email,
+    token,
+    type: 'email',
+  })
+
+  if (error) {
+    return { error: 'Invalid or expired code. Please try again.' }
   }
 
   redirect('/dashboard')

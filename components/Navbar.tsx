@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Car, Menu, X, User, LogOut, Settings, LayoutDashboard } from 'lucide-react'
@@ -49,12 +50,17 @@ export function Navbar({ user, profile }: NavbarProps) {
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <span className="text-xl font-bold text-gray-900 tracking-tight">
-              Malshan <span className="text-brand">Rent A Car</span>
-            </span>
+            <Image
+              src="/logo.webp"
+              alt="Malshan Rent A Car Logo"
+              width={240}
+              height={80}
+              className="h-12 md:h-16 w-auto object-contain transition-all"
+              priority
+            />
           </Link>
 
           {/* Desktop Nav */}
@@ -98,6 +104,14 @@ export function Navbar({ user, profile }: NavbarProps) {
                       <Link href="/dashboard" className="flex items-center gap-2">
                         <LayoutDashboard size={16} />
                         My Bookings
+                      </Link>
+                    }
+                  />
+                  <DropdownMenuItem
+                    render={
+                      <Link href="/dashboard/settings" className="flex items-center gap-2">
+                        <User size={16} />
+                        Account Settings
                       </Link>
                     }
                   />
@@ -178,6 +192,14 @@ export function Navbar({ user, profile }: NavbarProps) {
                   >
                     <LayoutDashboard size={16} />
                     My Bookings
+                  </Link>
+                  <Link
+                    href="/dashboard/settings"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-brand hover:bg-gray-50 rounded-md"
+                  >
+                    <User size={16} />
+                    Account Settings
                   </Link>
                   {profile.role === 'admin' && (
                     <Link

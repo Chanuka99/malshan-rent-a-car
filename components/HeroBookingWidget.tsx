@@ -47,7 +47,7 @@ export function HeroBookingWidget() {
         </div>
 
         {/* Dates */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <Label htmlFor="heroPickup" className="text-xs text-gray-500 uppercase tracking-wide font-semibold">
               Pick-up Date
@@ -60,7 +60,7 @@ export function HeroBookingWidget() {
                 min={today}
                 value={pickupDate}
                 onChange={(e) => setPickupDate(e.target.value)}
-                className="pl-9 text-sm"
+                className="pl-9 text-sm w-full"
               />
             </div>
           </div>
@@ -76,7 +76,7 @@ export function HeroBookingWidget() {
                 min={pickupDate || today}
                 value={dropoffDate}
                 onChange={(e) => setDropoffDate(e.target.value)}
-                className="pl-9 text-sm"
+                className="pl-9 text-sm w-full"
               />
             </div>
           </div>

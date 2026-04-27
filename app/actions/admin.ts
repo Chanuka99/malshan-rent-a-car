@@ -97,13 +97,33 @@ export async function updateBookingStatusAction(
   if (!(await isAdmin())) return { error: 'Unauthorized' }
 
   const supabase = await createClient()
+
+  // Get the car_id for this booking
+  const { data: bookingData } = await supabase
+    .from('bookings')
+    .select('car_id')
+    .eq('id', bookingId)
+    .single()
+
   const { error } = await supabase
     .from('bookings')
     .update({ status })
     .eq('id', bookingId)
+
   if (error) return { error: error.message }
 
+  // If status is confirmed, car is NOT available.
+  // If status is cancelled, car IS available.
+  if (bookingData?.car_id) {
+    await supabase
+      .from('cars')
+      .update({ available: status !== 'confirmed' })
+      .eq('id', bookingData.car_id)
+  }
+
   revalidatePath('/admin')
+  revalidatePath('/cars')
+  revalidatePath('/')
   return { success: true }
 }
 
