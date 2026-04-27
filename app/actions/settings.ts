@@ -3,20 +3,22 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-export async function updateProfileSettings(formData: FormData) {
+export async function updateProfileSettings(formData: FormData): Promise<void> {
   const firstName = formData.get('firstName') as string
   const lastName = formData.get('lastName') as string
   const phone = formData.get('phone') as string
   
   if (!firstName || !lastName || !phone) {
-    return { error: 'Please fill out all fields.' }
+    console.error('Please fill out all fields.')
+    return
   }
 
   const supabase = await createClient()
   const { data: userData, error: userError } = await supabase.auth.getUser()
 
   if (userError || !userData.user) {
-    return { error: 'Unauthorized' }
+    console.error('Unauthorized')
+    return
   }
 
   const fullName = `${firstName} ${lastName}`.trim()
@@ -30,22 +32,24 @@ export async function updateProfileSettings(formData: FormData) {
     .eq('id', userData.user.id)
 
   if (error) {
-    return { error: error.message }
+    console.error(error.message)
+    return
   }
 
   revalidatePath('/dashboard/settings')
-  return { success: true }
 }
 
-export async function updatePassword(formData: FormData) {
+export async function updatePassword(formData: FormData): Promise<void> {
   const newPassword = formData.get('newPassword') as string
   const confirmPassword = formData.get('confirmPassword') as string
 
   if (!newPassword || newPassword.length < 8) {
-    return { error: 'Password must be at least 8 characters long.' }
+    console.error('Password must be at least 8 characters long.')
+    return
   }
   if (newPassword !== confirmPassword) {
-    return { error: 'Passwords do not match.' }
+    console.error('Passwords do not match.')
+    return
   }
 
   const supabase = await createClient()
@@ -55,8 +59,7 @@ export async function updatePassword(formData: FormData) {
   })
 
   if (error) {
-    return { error: error.message }
+    console.error(error.message)
+    return
   }
-
-  return { success: true }
 }
