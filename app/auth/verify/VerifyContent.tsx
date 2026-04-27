@@ -72,6 +72,8 @@ export default function VerifyContent() {
       setError(result.error)
       setDigits(['', '', '', '', '', '', '', ''])
       inputRefs.current[0]?.focus()
+    } else if (result?.success && result?.redirect) {
+      router.push(result.redirect)
     }
     setIsLoading(false)
   }

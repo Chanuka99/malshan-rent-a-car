@@ -23,7 +23,7 @@ export async function loginAction(formData: FormData) {
     return { error: error.message }
   }
 
-  redirect(`/auth/verify?email=${encodeURIComponent(email)}`)
+  return { success: true, redirect: `/auth/verify?email=${encodeURIComponent(email)}` }
 }
 
 export async function registerAction(formData: FormData) {
@@ -64,8 +64,8 @@ export async function registerAction(formData: FormData) {
     return { error: 'An account with this email already exists. Please sign in instead.' }
   }
 
-  // Redirect to OTP verify page with email as query param
-  redirect(`/auth/verify?email=${encodeURIComponent(parsed.data.email)}`)
+  // Return success and redirect path
+  return { success: true, redirect: `/auth/verify?email=${encodeURIComponent(parsed.data.email)}` }
 }
 
 export async function verifyOtpAction(formData: FormData) {
@@ -88,7 +88,7 @@ export async function verifyOtpAction(formData: FormData) {
     return { error: 'Invalid or expired code. Please try again.' }
   }
 
-  redirect('/dashboard')
+  return { success: true, redirect: '/dashboard' }
 }
 
 export async function logoutAction() {

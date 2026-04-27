@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Eye, EyeOff, Car, Mail, Lock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -22,6 +23,8 @@ export default function LoginPage() {
     formState: { errors },
   } = useForm<LoginInput>({ resolver: zodResolver(LoginSchema) })
 
+  const router = useRouter()
+
   async function onSubmit(data: LoginInput) {
     setIsLoading(true)
     setServerError(null)
@@ -32,6 +35,8 @@ export default function LoginPage() {
     if (result?.error) {
       setServerError(result.error)
       setIsLoading(false)
+    } else if (result?.success && result?.redirect) {
+      router.push(result.redirect)
     }
   }
 
