@@ -41,7 +41,12 @@ export default function RegisterPage() {
       setServerError(result.error)
       setIsLoading(false)
     } else if (result?.success && result?.redirect) {
+      // Keep isLoading true during navigation, but set a safety timeout
       router.push(result.redirect)
+      // Reset after a timeout in case navigation is slow
+      setTimeout(() => setIsLoading(false), 5000)
+    } else {
+      setIsLoading(false)
     }
   }
 

@@ -30,13 +30,17 @@ export default function LoginPage() {
     setServerError(null)
     const formData = new FormData()
     formData.append('email', data.email)
-    formData.append('password', data.password)
     const result = await loginAction(formData)
     if (result?.error) {
       setServerError(result.error)
       setIsLoading(false)
     } else if (result?.success && result?.redirect) {
+      // Keep isLoading true during navigation, but set a safety timeout
       router.push(result.redirect)
+      // Reset after a timeout in case navigation is slow
+      setTimeout(() => setIsLoading(false), 5000)
+    } else {
+      setIsLoading(false)
     }
   }
 
@@ -77,28 +81,22 @@ export default function LoginPage() {
             </Link>
           </p>
 
-          <form action={async (formData) => {
-            setIsLoading(true)
-            setServerError(null)
-            const result = await loginAction(formData)
-            if (result?.error) {
-              setServerError(result.error)
-              setIsLoading(false)
-            }
-          }} className="space-y-5">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div>
               <Label htmlFor="email">Email address</Label>
               <div className="relative mt-1">
                 <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <Input
                   id="email"
-                  name="email"
                   type="email"
                   placeholder="you@example.com"
                   className="pl-9"
-                  required
+                  {...register('email')}
                 />
               </div>
+              {errors.email && (
+                <p className="text-xs text-red-500 mt-1">{errors.email.message}</p>
+              )}
             </div>
 
             {serverError && (
