@@ -1,14 +1,12 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { Mail, ShieldCheck, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { verifyOtpAction } from '@/app/actions/auth'
 
 export default function VerifyContent() {
   const searchParams = useSearchParams()
-  const router = useRouter()
   const email = searchParams.get('email') || ''
 
   const [digits, setDigits] = useState<string[]>(['', '', '', '', '', '', '', ''])
@@ -18,8 +16,8 @@ export default function VerifyContent() {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
 
   useEffect(() => {
-    if (!email) router.replace('/auth/register')
-  }, [email, router])
+    if (!email) window.location.href = '/auth/login'
+  }, [email])
 
   useEffect(() => {
     if (resendCooldown <= 0) return
@@ -66,21 +64,23 @@ export default function VerifyContent() {
     setError(null)
 
     try {
-      const formData = new FormData()
-      formData.append('email', email)
-      formData.append('token', token)
-      const result = await verifyOtpAction(formData)
-      
+      const res = await fetch('/api/auth/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, token }),
+      })
+      const result = await res.json()
+
       if (result?.error) {
         setError(result.error)
         setDigits(['', '', '', '', '', '', '', ''])
         inputRefs.current[0]?.focus()
-      } else if (result?.success && result?.redirect) {
-        window.location.href = result.redirect
+      } else {
+        // Hard navigate to dashboard
+        window.location.href = '/dashboard'
       }
-    } catch (err) {
-      console.error('OTP verification error:', err)
-      setError('An unexpected error occurred. Please try again.')
+    } catch {
+      setError('Network error. Please check your connection and try again.')
     } finally {
       setIsLoading(false)
     }

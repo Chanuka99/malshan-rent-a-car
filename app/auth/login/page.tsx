@@ -4,16 +4,13 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { Eye, EyeOff, Car, Mail, Lock } from 'lucide-react'
+import { Mail, Car } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { LoginSchema, type LoginInput } from '@/lib/validations'
-import { loginAction } from '@/app/actions/auth'
 
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -23,29 +20,27 @@ export default function LoginPage() {
     formState: { errors },
   } = useForm<LoginInput>({ resolver: zodResolver(LoginSchema) })
 
-  const router = useRouter()
-
   async function onSubmit(data: LoginInput) {
     setIsLoading(true)
     setServerError(null)
     
     try {
-      const formData = new FormData()
-      formData.append('email', data.email)
-      const result = await loginAction(formData)
+      const res = await fetch('/api/auth/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: data.email }),
+      })
+      const result = await res.json()
       
       if (result?.error) {
         setServerError(result.error)
         setIsLoading(false)
-      } else if (result?.success && result?.redirect) {
-        // Force navigation to the verify page
-        window.location.href = result.redirect
       } else {
-        setIsLoading(false)
+        // Hard navigate to verify page
+        window.location.href = `/auth/verify?email=${encodeURIComponent(data.email)}`
       }
-    } catch (err) {
-      console.error('Login error:', err)
-      setServerError('An unexpected error occurred. Please try again.')
+    } catch {
+      setServerError('Network error. Please check your connection and try again.')
       setIsLoading(false)
     }
   }
