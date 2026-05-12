@@ -29,23 +29,29 @@ export default function RegisterPage() {
   async function onSubmit(data: RegisterInput) {
     setIsLoading(true)
     setServerError(null)
-    const formData = new FormData()
-    formData.append('firstName', data.firstName)
-    formData.append('lastName', data.lastName)
-    formData.append('email', data.email)
-    formData.append('phone', data.phone)
-    formData.append('password', data.password)
-    formData.append('confirmPassword', data.confirmPassword)
-    const result = await registerAction(formData)
-    if (result?.error) {
-      setServerError(result.error)
-      setIsLoading(false)
-    } else if (result?.success && result?.redirect) {
-      // Keep isLoading true during navigation, but set a safety timeout
-      router.push(result.redirect)
-      // Reset after a timeout in case navigation is slow
-      setTimeout(() => setIsLoading(false), 5000)
-    } else {
+
+    try {
+      const formData = new FormData()
+      formData.append('firstName', data.firstName)
+      formData.append('lastName', data.lastName)
+      formData.append('email', data.email)
+      formData.append('phone', data.phone)
+      formData.append('password', data.password)
+      formData.append('confirmPassword', data.confirmPassword)
+      const result = await registerAction(formData)
+      
+      if (result?.error) {
+        setServerError(result.error)
+        setIsLoading(false)
+      } else if (result?.success && result?.redirect) {
+        // Force navigation
+        window.location.href = result.redirect
+      } else {
+        setIsLoading(false)
+      }
+    } catch (err) {
+      console.error('Registration error:', err)
+      setServerError('An unexpected error occurred. Please try again.')
       setIsLoading(false)
     }
   }

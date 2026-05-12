@@ -64,18 +64,26 @@ export default function VerifyContent() {
   async function submitOtp(token: string) {
     setIsLoading(true)
     setError(null)
-    const formData = new FormData()
-    formData.append('email', email)
-    formData.append('token', token)
-    const result = await verifyOtpAction(formData)
-    if (result?.error) {
-      setError(result.error)
-      setDigits(['', '', '', '', '', '', '', ''])
-      inputRefs.current[0]?.focus()
-    } else if (result?.success && result?.redirect) {
-      router.push(result.redirect)
+
+    try {
+      const formData = new FormData()
+      formData.append('email', email)
+      formData.append('token', token)
+      const result = await verifyOtpAction(formData)
+      
+      if (result?.error) {
+        setError(result.error)
+        setDigits(['', '', '', '', '', '', '', ''])
+        inputRefs.current[0]?.focus()
+      } else if (result?.success && result?.redirect) {
+        window.location.href = result.redirect
+      }
+    } catch (err) {
+      console.error('OTP verification error:', err)
+      setError('An unexpected error occurred. Please try again.')
+    } finally {
+      setIsLoading(false)
     }
-    setIsLoading(false)
   }
 
   async function handleSubmit(e: React.FormEvent) {

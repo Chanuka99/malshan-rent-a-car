@@ -28,18 +28,24 @@ export default function LoginPage() {
   async function onSubmit(data: LoginInput) {
     setIsLoading(true)
     setServerError(null)
-    const formData = new FormData()
-    formData.append('email', data.email)
-    const result = await loginAction(formData)
-    if (result?.error) {
-      setServerError(result.error)
-      setIsLoading(false)
-    } else if (result?.success && result?.redirect) {
-      // Keep isLoading true during navigation, but set a safety timeout
-      router.push(result.redirect)
-      // Reset after a timeout in case navigation is slow
-      setTimeout(() => setIsLoading(false), 5000)
-    } else {
+    
+    try {
+      const formData = new FormData()
+      formData.append('email', data.email)
+      const result = await loginAction(formData)
+      
+      if (result?.error) {
+        setServerError(result.error)
+        setIsLoading(false)
+      } else if (result?.success && result?.redirect) {
+        // Force navigation to the verify page
+        window.location.href = result.redirect
+      } else {
+        setIsLoading(false)
+      }
+    } catch (err) {
+      console.error('Login error:', err)
+      setServerError('An unexpected error occurred. Please try again.')
       setIsLoading(false)
     }
   }
