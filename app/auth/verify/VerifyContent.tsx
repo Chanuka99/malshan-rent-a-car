@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Mail, ShieldCheck, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { createClient } from '@/lib/supabase/client'
 
 export default function VerifyContent() {
   const searchParams = useSearchParams()
@@ -64,25 +65,43 @@ export default function VerifyContent() {
     setError(null)
 
     try {
-      const res = await fetch('/api/auth/verify-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, token }),
+      const supabase = createClient()
+      const { error: verifyError } = await supabase.auth.verifyOtp({
+        email,
+        token,
+        type: 'email',
       })
-      const result = await res.json()
 
-      if (result?.error) {
-        setError(result.error)
+      if (verifyError) {
+        setError('Invalid or expired code. Please try again.')
         setDigits(['', '', '', '', '', '', '', ''])
         inputRefs.current[0]?.focus()
-      } else {
-        // Hard navigate to dashboard
-        window.location.href = '/dashboard'
+        setIsLoading(false)
+        return
       }
+
+      // Verified! Hard navigate to dashboard
+      window.location.href = '/dashboard'
     } catch {
-      setError('Network error. Please check your connection and try again.')
-    } finally {
+      setError('Something went wrong. Please try again.')
       setIsLoading(false)
+    }
+  }
+
+  async function handleResend() {
+    setResendCooldown(60)
+    setError(null)
+    setDigits(['', '', '', '', '', '', '', ''])
+    inputRefs.current[0]?.focus()
+
+    try {
+      const supabase = createClient()
+      await supabase.auth.signInWithOtp({
+        email,
+        options: { shouldCreateUser: false },
+      })
+    } catch {
+      // silently fail
     }
   }
 
@@ -181,12 +200,7 @@ export default function VerifyContent() {
             <button
               type="button"
               disabled={resendCooldown > 0}
-              onClick={() => {
-                setResendCooldown(60)
-                setError(null)
-                setDigits(['', '', '', '', '', '', '', ''])
-                inputRefs.current[0]?.focus()
-              }}
+              onClick={handleResend}
               className="inline-flex items-center gap-1.5 text-sm font-medium text-brand hover:underline disabled:text-gray-400 disabled:no-underline disabled:cursor-not-allowed"
             >
               <RefreshCw size={14} />
@@ -196,7 +210,7 @@ export default function VerifyContent() {
 
           <p className="mt-6 text-center text-sm text-gray-500">
             Wrong email?{' '}
-            <a href="/auth/register" className="text-brand font-medium hover:underline">
+            <a href="/auth/login" className="text-brand font-medium hover:underline">
               Go back
             </a>
           </p>

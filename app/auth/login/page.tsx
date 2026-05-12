@@ -1,46 +1,49 @@
 'use client'
 
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
 import { Mail, Car } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { LoginSchema, type LoginInput } from '@/lib/validations'
+import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
+  const [email, setEmail] = useState('')
   const [serverError, setServerError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginInput>({ resolver: zodResolver(LoginSchema) })
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    
+    if (!email || !email.includes('@')) {
+      setServerError('Please enter a valid email address.')
+      return
+    }
 
-  async function onSubmit(data: LoginInput) {
     setIsLoading(true)
     setServerError(null)
-    
+
     try {
-      const res = await fetch('/api/auth/send-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: data.email }),
+      const supabase = createClient()
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          shouldCreateUser: false,
+        },
       })
-      const result = await res.json()
-      
-      if (result?.error) {
-        setServerError(result.error)
+
+      if (error) {
+        setServerError(error.message)
         setIsLoading(false)
-      } else {
-        // Hard navigate to verify page
-        window.location.href = `/auth/verify?email=${encodeURIComponent(data.email)}`
+        return
       }
-    } catch {
-      setServerError('Network error. Please check your connection and try again.')
+
+      // OTP sent successfully — navigate to verify page
+      window.location.href = `/auth/verify?email=${encodeURIComponent(email)}`
+    } catch (err) {
+      console.error('Login error:', err)
+      setServerError('Something went wrong. Please try again.')
       setIsLoading(false)
     }
   }
@@ -71,7 +74,7 @@ export default function LoginPage() {
             <div className="w-8 h-8 bg-brand rounded-md flex items-center justify-center">
               <Car size={16} className="text-white" />
             </div>
-            <span className="text-xl font-bold text-gray-900">Drive<span className="text-brand">Ease</span></span>
+            <span className="text-xl font-bold text-gray-900">Malshan <span className="text-brand">Rent A Car</span></span>
           </div>
 
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Sign in</h1>
@@ -82,7 +85,7 @@ export default function LoginPage() {
             </Link>
           </p>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <form onSubmit={onSubmit} className="space-y-5">
             <div>
               <Label htmlFor="email">Email address</Label>
               <div className="relative mt-1">
@@ -92,12 +95,11 @@ export default function LoginPage() {
                   type="email"
                   placeholder="you@example.com"
                   className="pl-9"
-                  {...register('email')}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
                 />
               </div>
-              {errors.email && (
-                <p className="text-xs text-red-500 mt-1">{errors.email.message}</p>
-              )}
             </div>
 
             {serverError && (
