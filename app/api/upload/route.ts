@@ -1,30 +1,38 @@
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { NextResponse, type NextRequest } from 'next/server'
 import type { Profile } from '@/types/supabase'
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024 // 2 MB
 
+// Service-role client bypasses RLS — only used AFTER admin auth is verified
+function getAdminStorageClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+  return createServiceClient(url, serviceKey, {
+    auth: { persistSession: false },
+  })
+}
+
+async function verifyAdmin() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+
+  const { data } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+  const profile = data as Profile | null
+  return profile?.role === 'admin' ? user : null
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
-
-    // Auth check
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+    const user = await verifyAdmin()
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Admin check
-    const { data } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single()
-    const profile = data as Profile | null
-    if (profile?.role !== 'admin') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
     // Parse form data
@@ -33,16 +41,13 @@ export async function POST(request: NextRequest) {
     const folder = formData.get('folder') as string | null
 
     if (!file || !(file instanceof File)) {
-      return NextResponse.json(
-        { error: 'No file provided' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'No file provided' }, { status: 400 })
     }
 
     // Validate file size (2 MB max)
     if (file.size > MAX_FILE_SIZE) {
       return NextResponse.json(
-        { error: `File too large. Maximum size is 2 MB.` },
+        { error: 'File too large. Maximum size is 2 MB.' },
         { status: 400 }
       )
     }
@@ -56,19 +61,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Upload to Supabase Storage
+    // Build file path
     const fileExt = file.name.split('.').pop()
-    const randomString = Math.random().toString(36).slice(2)
-    const fileName = `${Date.now()}-${randomString}.${fileExt}`
-    
-    // Construct the path (folder/filename)
+    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`
     const filePath = folder ? `${folder}/${fileName}` : fileName
 
-    // Convert File to ArrayBuffer for reliable upload
+    // Convert to buffer
     const arrayBuffer = await file.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
 
-    const { error: uploadError } = await supabase.storage
+    // Use service-role client to bypass storage RLS
+    const adminSupabase = getAdminStorageClient()
+    const { error: uploadError } = await adminSupabase.storage
       .from('cars')
       .upload(filePath, buffer, {
         contentType: file.type,
@@ -79,19 +83,16 @@ export async function POST(request: NextRequest) {
       console.error('Supabase upload error:', uploadError)
       const isBucketError = uploadError.message?.toLowerCase().includes('bucket not found')
       return NextResponse.json(
-        { 
-          error: isBucketError 
-            ? 'Storage bucket "cars" not found. Please create it in your Supabase dashboard and set it to public.' 
-            : uploadError.message 
+        {
+          error: isBucketError
+            ? 'Storage bucket "cars" not found. Please create it in Supabase dashboard.'
+            : uploadError.message,
         },
         { status: 500 }
       )
     }
 
-    const { data: urlData } = supabase.storage
-      .from('cars')
-      .getPublicUrl(filePath)
-
+    const { data: urlData } = adminSupabase.storage.from('cars').getPublicUrl(filePath)
     return NextResponse.json({ url: urlData.publicUrl })
   } catch (err) {
     console.error('Upload route error:', err)
@@ -104,25 +105,9 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const supabase = await createClient()
-
-    // Auth check
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+    const user = await verifyAdmin()
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Admin check
-    const { data } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single()
-    const profile = data as Profile | null
-    if (profile?.role !== 'admin') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
     const { url } = await request.json()
@@ -131,15 +116,15 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Extract file path from public URL
-    // Format: https://[project].supabase.co/storage/v1/object/public/cars/[folder]/[filename]
     const parts = url.split('/public/cars/')
     if (parts.length !== 2) {
       return NextResponse.json({ error: 'Invalid URL format' }, { status: 400 })
     }
-    
     const filePath = parts[1]
 
-    const { error: deleteError } = await supabase.storage
+    // Use service-role client to bypass storage RLS
+    const adminSupabase = getAdminStorageClient()
+    const { error: deleteError } = await adminSupabase.storage
       .from('cars')
       .remove([filePath])
 
