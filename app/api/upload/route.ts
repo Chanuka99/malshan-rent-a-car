@@ -30,6 +30,7 @@ export async function POST(request: NextRequest) {
     // Parse form data
     const formData = await request.formData()
     const file = formData.get('file') as File | null
+    const folder = formData.get('folder') as string | null
 
     if (!file || !(file instanceof File)) {
       return NextResponse.json(
@@ -57,7 +58,11 @@ export async function POST(request: NextRequest) {
 
     // Upload to Supabase Storage
     const fileExt = file.name.split('.').pop()
-    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`
+    const randomString = Math.random().toString(36).slice(2)
+    const fileName = `${Date.now()}-${randomString}.${fileExt}`
+    
+    // Construct the path (folder/filename)
+    const filePath = folder ? `${folder}/${fileName}` : fileName
 
     // Convert File to ArrayBuffer for reliable upload
     const arrayBuffer = await file.arrayBuffer()
@@ -65,22 +70,27 @@ export async function POST(request: NextRequest) {
 
     const { error: uploadError } = await supabase.storage
       .from('cars')
-      .upload(fileName, buffer, {
+      .upload(filePath, buffer, {
         contentType: file.type,
         upsert: false,
       })
 
     if (uploadError) {
       console.error('Supabase upload error:', uploadError)
+      const isBucketError = uploadError.message?.toLowerCase().includes('bucket not found')
       return NextResponse.json(
-        { error: uploadError.message },
+        { 
+          error: isBucketError 
+            ? 'Storage bucket "cars" not found. Please create it in your Supabase dashboard and set it to public.' 
+            : uploadError.message 
+        },
         { status: 500 }
       )
     }
 
     const { data: urlData } = supabase.storage
       .from('cars')
-      .getPublicUrl(fileName)
+      .getPublicUrl(filePath)
 
     return NextResponse.json({ url: urlData.publicUrl })
   } catch (err) {

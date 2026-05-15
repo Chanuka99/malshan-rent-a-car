@@ -54,8 +54,11 @@ export function AdminFleetTab({ initialCars }: AdminFleetTabProps) {
     handleSubmit,
     control,
     reset,
+    watch,
     formState: { errors },
   } = useForm<CarInput>({ resolver: zodResolver(CarSchema) })
+
+  const carName = watch('name')
 
   function openAdd() {
     setEditingCar(null)
@@ -113,6 +116,14 @@ export function AdminFleetTab({ initialCars }: AdminFleetTabProps) {
     try {
       const formData = new FormData()
       formData.append('file', file)
+      
+      // Pass folder name based on car name or ID
+      if (editingCar) {
+        formData.append('folder', editingCar.id)
+      } else if (carName) {
+        const slug = carName.replace(/\s+/g, '-').toLowerCase().replace(/[^a-z0-9-]/g, '')
+        if (slug) formData.append('folder', slug)
+      }
 
       const res = await fetch('/api/upload', {
         method: 'POST',
