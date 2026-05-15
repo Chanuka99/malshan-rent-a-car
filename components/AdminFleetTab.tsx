@@ -25,7 +25,7 @@ import {
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { CarSchema, type CarInput } from '@/lib/validations'
-import { addCarAction, updateCarAction, deleteCarAction, uploadCarImageAction } from '@/app/actions/admin'
+import { addCarAction, updateCarAction, deleteCarAction } from '@/app/actions/admin'
 import { formatCurrency } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
 import type { Car } from '@/types/supabase'
@@ -42,6 +42,11 @@ export function AdminFleetTab({ initialCars }: AdminFleetTabProps) {
   const [imageUrls, setImageUrls] = useState<string[]>([])
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+
+  const MAX_IMAGES = 5
+  const MAX_FILE_SIZE_MB = 2
+  const MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1024 * 1024
   const router = useRouter()
 
   const {
@@ -80,12 +85,53 @@ export function AdminFleetTab({ initialCars }: AdminFleetTabProps) {
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-    setUploading(true)
-    const result = await uploadCarImageAction(file)
-    if ('url' in result) {
-      setImageUrls((prev) => [...prev, result.url])
+    setUploadError(null)
+
+    // Validate max images
+    if (imageUrls.length >= MAX_IMAGES) {
+      setUploadError(`Maximum ${MAX_IMAGES} images allowed.`)
+      e.target.value = ''
+      return
     }
-    setUploading(false)
+
+    // Validate file size
+    if (file.size > MAX_FILE_SIZE) {
+      setUploadError(`File too large. Maximum size is ${MAX_FILE_SIZE_MB} MB.`)
+      e.target.value = ''
+      return
+    }
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
+    if (!allowedTypes.includes(file.type)) {
+      setUploadError('Only JPG, PNG, and WebP images are allowed.')
+      e.target.value = ''
+      return
+    }
+
+    setUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const result = await res.json()
+
+      if (!res.ok) {
+        setUploadError(result.error || 'Upload failed.')
+      } else if (result.url) {
+        setImageUrls((prev) => [...prev, result.url])
+      }
+    } catch {
+      setUploadError('Upload failed. Please try again.')
+    } finally {
+      setUploading(false)
+      e.target.value = ''
+    }
   }
 
   async function onSubmit(data: CarInput) {
@@ -257,32 +303,50 @@ export function AdminFleetTab({ initialCars }: AdminFleetTabProps) {
 
               {/* Image Upload */}
               <div>
-                <Label>Images</Label>
-                <div className="mt-1 border-2 border-dashed border-gray-200 rounded-lg p-4">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                    id="imageUpload"
-                  />
-                  <label
-                    htmlFor="imageUpload"
-                    className="cursor-pointer flex flex-col items-center text-sm text-gray-500 hover:text-brand"
-                  >
-                    {uploading ? (
-                      <div className="w-5 h-5 border-2 border-brand border-t-transparent rounded-full animate-spin mx-auto" />
-                    ) : (
-                      <Plus size={20} className="mb-1" />
-                    )}
-                    {uploading ? 'Uploading...' : 'Click to upload image'}
-                  </label>
+                <div className="flex items-center justify-between">
+                  <Label>Images</Label>
+                  <span className="text-xs text-gray-400">
+                    {imageUrls.length}/{MAX_IMAGES} · Max {MAX_FILE_SIZE_MB} MB each
+                  </span>
                 </div>
+                {imageUrls.length < MAX_IMAGES && (
+                  <div className="mt-1 border-2 border-dashed border-gray-200 rounded-lg p-4">
+                    <input
+                      type="file"
+                      accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                      id="imageUpload"
+                      disabled={uploading}
+                    />
+                    <label
+                      htmlFor="imageUpload"
+                      className={`flex flex-col items-center text-sm ${
+                        uploading
+                          ? 'text-gray-400 cursor-wait'
+                          : 'text-gray-500 hover:text-brand cursor-pointer'
+                      }`}
+                    >
+                      {uploading ? (
+                        <div className="w-5 h-5 border-2 border-brand border-t-transparent rounded-full animate-spin mx-auto" />
+                      ) : (
+                        <Plus size={20} className="mb-1" />
+                      )}
+                      {uploading ? 'Uploading...' : 'Click to upload image'}
+                    </label>
+                  </div>
+                )}
+                {imageUrls.length >= MAX_IMAGES && (
+                  <p className="mt-1 text-xs text-amber-600">Maximum {MAX_IMAGES} images reached.</p>
+                )}
+                {uploadError && (
+                  <p className="text-xs text-red-500 mt-1">{uploadError}</p>
+                )}
                 {imageUrls.length > 0 && (
                   <div className="flex gap-2 mt-2 flex-wrap">
                     {imageUrls.map((url, i) => (
                       <div key={i} className="relative w-16 h-16 rounded-md overflow-hidden border border-gray-200">
-                        <Image src={url} alt="" fill className="object-cover" sizes="64px" />
+                        <img src={url} alt="" className="object-cover w-full h-full" />
                         <button
                           type="button"
                           onClick={() => setImageUrls((prev) => prev.filter((_, idx) => idx !== i))}

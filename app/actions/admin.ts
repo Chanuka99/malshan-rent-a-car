@@ -127,18 +127,4 @@ export async function updateBookingStatusAction(
   return { success: true }
 }
 
-export async function uploadCarImageAction(file: File): Promise<{ url: string } | { error: string }> {
-  if (!(await isAdmin())) return { error: 'Unauthorized' }
 
-  const supabase = await createClient()
-  const fileExt = file.name.split('.').pop()
-  const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`
-
-  const { error: uploadError } = await supabase.storage
-    .from('cars')
-    .upload(fileName, file, { contentType: file.type })
-  if (uploadError) return { error: uploadError.message }
-
-  const { data } = supabase.storage.from('cars').getPublicUrl(fileName)
-  return { url: data.publicUrl }
-}
