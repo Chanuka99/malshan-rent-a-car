@@ -81,8 +81,25 @@ export async function deleteCarAction(carId: string) {
   if (!(await isAdmin())) return { error: 'Unauthorized' }
 
   const supabase = await createClient()
+  
+  // 1. Get the car to find its images
+  const { data: car } = await supabase.from('cars').select('images').eq('id', carId).single()
+  
+  // 2. Delete the car from DB
   const { error } = await supabase.from('cars').delete().eq('id', carId)
   if (error) return { error: error.message }
+
+  // 3. Delete images from storage if they exist
+  if (car?.images && car.images.length > 0) {
+    const filePaths = car.images.map((url: string) => {
+      const parts = url.split('/public/cars/')
+      return parts.length === 2 ? parts[1] : null
+    }).filter(Boolean) as string[]
+
+    if (filePaths.length > 0) {
+      await supabase.storage.from('cars').remove(filePaths)
+    }
+  }
 
   revalidatePath('/admin')
   revalidatePath('/cars')

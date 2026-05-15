@@ -101,3 +101,59 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const supabase = await createClient()
+
+    // Auth check
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Admin check
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single()
+    const profile = data as Profile | null
+    if (profile?.role !== 'admin') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    const { url } = await request.json()
+    if (!url) {
+      return NextResponse.json({ error: 'No URL provided' }, { status: 400 })
+    }
+
+    // Extract file path from public URL
+    // Format: https://[project].supabase.co/storage/v1/object/public/cars/[folder]/[filename]
+    const parts = url.split('/public/cars/')
+    if (parts.length !== 2) {
+      return NextResponse.json({ error: 'Invalid URL format' }, { status: 400 })
+    }
+    
+    const filePath = parts[1]
+
+    const { error: deleteError } = await supabase.storage
+      .from('cars')
+      .remove([filePath])
+
+    if (deleteError) {
+      console.error('Supabase delete error:', deleteError)
+      return NextResponse.json({ error: deleteError.message }, { status: 500 })
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (err) {
+    console.error('Delete route error:', err)
+    return NextResponse.json(
+      { error: 'Delete failed. Please try again.' },
+      { status: 500 }
+    )
+  }
+}

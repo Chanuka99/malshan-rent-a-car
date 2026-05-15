@@ -145,6 +145,22 @@ export function AdminFleetTab({ initialCars }: AdminFleetTabProps) {
     }
   }
 
+  async function handleRemoveImage(index: number, url: string) {
+    // Optimistically remove from UI
+    setImageUrls((prev) => prev.filter((_, i) => i !== index))
+    
+    // Delete from Supabase storage
+    try {
+      await fetch('/api/upload', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
+      })
+    } catch (err) {
+      console.error('Failed to delete image from storage:', err)
+    }
+  }
+
   async function onSubmit(data: CarInput) {
     setSubmitting(true)
     setError(null)
@@ -360,7 +376,7 @@ export function AdminFleetTab({ initialCars }: AdminFleetTabProps) {
                         <img src={url} alt="" className="object-cover w-full h-full" />
                         <button
                           type="button"
-                          onClick={() => setImageUrls((prev) => prev.filter((_, idx) => idx !== i))}
+                          onClick={() => handleRemoveImage(i, url)}
                           className="absolute top-0 right-0 bg-red-500 text-white w-4 h-4 flex items-center justify-center text-xs leading-none"
                         >
                           ×
