@@ -3,14 +3,23 @@ import { NextResponse, type NextRequest } from 'next/server'
 import type { Database } from '@/types/supabase'
 
 export async function middleware(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request })
-
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('Missing Supabase environment variables: NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY')
+    console.error(
+      'Supabase middleware skipped: missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY'
+    )
+
+    const { pathname } = request.nextUrl
+    if (pathname.startsWith('/dashboard') || pathname.startsWith('/admin')) {
+      return NextResponse.redirect(new URL('/auth/login', request.url))
+    }
+
+    return NextResponse.next({ request })
   }
+
+  let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient<Database>(
     supabaseUrl,
@@ -30,34 +39,37 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Refresh session
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
   const { pathname } = request.nextUrl
 
-  // Protect /dashboard — requires authenticated user
-  if (pathname.startsWith('/dashboard') && !user) {
-    return NextResponse.redirect(new URL('/auth/login', request.url))
-  }
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
-  // Protect /admin — requires authenticated user with role === 'admin'
-  if (pathname.startsWith('/admin')) {
-    if (!user) {
+    // Protect /dashboard — requires authenticated user
+    if (pathname.startsWith('/dashboard') && !user) {
       return NextResponse.redirect(new URL('/auth/login', request.url))
     }
 
-    const { data: profileData } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single()
+    // Protect /admin — requires authenticated user with role === 'admin'
+    if (pathname.startsWith('/admin')) {
+      if (!user) {
+        return NextResponse.redirect(new URL('/auth/login', request.url))
+      }
 
-    const profile = profileData as { role: string } | null
-    if (!profile || profile.role !== 'admin') {
-      return NextResponse.redirect(new URL('/', request.url))
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+
+      const profile = profileData as { role: string } | null
+      if (!profile || profile.role !== 'admin') {
+        return NextResponse.redirect(new URL('/', request.url))
+      }
     }
+  } catch (error) {
+    console.error('Supabase middleware auth error:', error)
   }
 
   return supabaseResponse
