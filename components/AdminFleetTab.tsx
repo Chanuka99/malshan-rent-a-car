@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { Plus, Pencil, Trash2, Car as CarIcon } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Plus, Pencil, Trash2, Car as CarIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -190,6 +190,16 @@ export function AdminFleetTab({ initialCars, brands = [], models = [] }: AdminFl
     } catch (err) {
       console.error('Failed to delete image from storage:', err)
     }
+  }
+
+  function moveImage(index: number, direction: -1 | 1) {
+    setImageUrls((prev) => {
+      const next = [...prev]
+      const swapIndex = index + direction
+      if (swapIndex < 0 || swapIndex >= next.length) return prev
+      ;[next[index], next[swapIndex]] = [next[swapIndex], next[index]]
+      return next
+    })
   }
 
   async function onSubmit(data: CarInput) {
@@ -494,6 +504,24 @@ export function AdminFleetTab({ initialCars, brands = [], models = [] }: AdminFl
                     {imageUrls.map((url, i) => (
                       <div key={i} className="relative w-16 h-16 rounded-md overflow-hidden border border-gray-200">
                         <img src={url} alt="" className="object-cover w-full h-full" />
+                        <div className="absolute inset-x-0 bottom-0 flex justify-between gap-1 p-1 bg-black/40">
+                          <button
+                            type="button"
+                            onClick={() => moveImage(i, -1)}
+                            disabled={i === 0}
+                            className="rounded-sm bg-white/90 text-gray-700 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <ArrowLeft size={12} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => moveImage(i, 1)}
+                            disabled={i === imageUrls.length - 1}
+                            className="rounded-sm bg-white/90 text-gray-700 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <ArrowRight size={12} />
+                          </button>
+                        </div>
                         <button
                           type="button"
                           onClick={() => handleRemoveImage(i, url)}
