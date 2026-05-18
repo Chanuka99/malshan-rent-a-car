@@ -12,10 +12,15 @@ interface CarCardProps {
 }
 
 const typeColors: Record<string, string> = {
-  economy: 'bg-blue-100 text-blue-700',
-  suv: 'bg-green-100 text-green-700',
-  luxury: 'bg-purple-100 text-purple-700',
-  van: 'bg-orange-100 text-orange-700',
+  Hatchback: 'bg-blue-100 text-blue-700',
+  Sedan: 'bg-indigo-100 text-indigo-700',
+  'SUV / Crossover': 'bg-green-100 text-green-700',
+  Van: 'bg-orange-100 text-orange-700',
+  'Station Wagon': 'bg-teal-100 text-teal-700',
+  'Pickup Truck / Double Cab': 'bg-yellow-100 text-yellow-700',
+  'MPV (Multi-Purpose Vehicle)': 'bg-pink-100 text-pink-700',
+  Coupe: 'bg-purple-100 text-purple-700',
+  Convertible: 'bg-red-100 text-red-700',
 }
 
 const fuelIcons: Record<string, string> = {

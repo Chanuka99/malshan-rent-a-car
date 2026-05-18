@@ -37,7 +37,8 @@ export default async function CarsPage({ searchParams }: CarsPageProps) {
 
   // Apply filters
   if (params.type) {
-    const types = params.type.split(',') as ('economy' | 'suv' | 'luxury' | 'van')[]
+    type CarType = 'Hatchback' | 'Sedan' | 'SUV / Crossover' | 'Van' | 'Station Wagon' | 'Pickup Truck / Double Cab' | 'MPV (Multi-Purpose Vehicle)' | 'Coupe' | 'Convertible'
+    const types = params.type.split(',') as CarType[]
     if (types.length === 1) {
       query = query.eq('type', types[0])
     } else {

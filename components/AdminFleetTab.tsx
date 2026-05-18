@@ -328,10 +328,15 @@ export function AdminFleetTab({ initialCars, brands = [], models = [] }: AdminFl
                           <SelectValue placeholder="Select type" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="economy">Economy</SelectItem>
-                          <SelectItem value="suv">SUV</SelectItem>
-                          <SelectItem value="luxury">Luxury</SelectItem>
-                          <SelectItem value="van">Van</SelectItem>
+                          <SelectItem value="Hatchback">Hatchback</SelectItem>
+                          <SelectItem value="Sedan">Sedan</SelectItem>
+                          <SelectItem value="SUV / Crossover">SUV / Crossover</SelectItem>
+                          <SelectItem value="Van">Van</SelectItem>
+                          <SelectItem value="Station Wagon">Station Wagon</SelectItem>
+                          <SelectItem value="Pickup Truck / Double Cab">Pickup Truck / Double Cab</SelectItem>
+                          <SelectItem value="MPV (Multi-Purpose Vehicle)">MPV (Multi-Purpose Vehicle)</SelectItem>
+                          <SelectItem value="Coupe">Coupe</SelectItem>
+                          <SelectItem value="Convertible">Convertible</SelectItem>
                         </SelectContent>
                       </Select>
                     )}
@@ -376,6 +381,7 @@ export function AdminFleetTab({ initialCars, brands = [], models = [] }: AdminFl
                         <SelectContent>
                           <SelectItem value="auto">Automatic</SelectItem>
                           <SelectItem value="manual">Manual</SelectItem>
+                          <SelectItem value="tiptronic">Tiptronic</SelectItem>
                         </SelectContent>
                       </Select>
                     )}

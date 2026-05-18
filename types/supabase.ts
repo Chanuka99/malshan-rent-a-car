@@ -86,9 +86,9 @@ export type Database = {
           brand: string
           model: string
           year: number
-          type: 'economy' | 'suv' | 'luxury' | 'van'
+          type: 'Hatchback' | 'Sedan' | 'SUV / Crossover' | 'Van' | 'Station Wagon' | 'Pickup Truck / Double Cab' | 'MPV (Multi-Purpose Vehicle)' | 'Coupe' | 'Convertible'
           seats: number
-          transmission: 'auto' | 'manual'
+          transmission: 'auto' | 'manual' | 'tiptronic'
           fuel_type: 'petrol' | 'diesel' | 'hybrid' | 'electric'
           price_per_day: number
           images: string[]
@@ -102,9 +102,9 @@ export type Database = {
           brand: string
           model: string
           year: number
-          type: 'economy' | 'suv' | 'luxury' | 'van'
+          type: 'Hatchback' | 'Sedan' | 'SUV / Crossover' | 'Van' | 'Station Wagon' | 'Pickup Truck / Double Cab' | 'MPV (Multi-Purpose Vehicle)' | 'Coupe' | 'Convertible'
           seats: number
-          transmission: 'auto' | 'manual'
+          transmission: 'auto' | 'manual' | 'tiptronic'
           fuel_type: 'petrol' | 'diesel' | 'hybrid' | 'electric'
           price_per_day: number
           images?: string[]
@@ -118,9 +118,9 @@ export type Database = {
           brand?: string
           model?: string
           year?: number
-          type?: 'economy' | 'suv' | 'luxury' | 'van'
+          type?: 'Hatchback' | 'Sedan' | 'SUV / Crossover' | 'Van' | 'Station Wagon' | 'Pickup Truck / Double Cab' | 'MPV (Multi-Purpose Vehicle)' | 'Coupe' | 'Convertible'
           seats?: number
-          transmission?: 'auto' | 'manual'
+          transmission?: 'auto' | 'manual' | 'tiptronic'
           fuel_type?: 'petrol' | 'diesel' | 'hybrid' | 'electric'
           price_per_day?: number
           images?: string[]

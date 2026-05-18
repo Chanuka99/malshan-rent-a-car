@@ -21,8 +21,8 @@ interface FiltersProps {
   }
 }
 
-const carTypes = ['economy', 'suv', 'luxury', 'van']
-const fuelTypes = ['petrol', 'diesel', 'electric']
+const carTypes = ['Hatchback', 'Sedan', 'SUV / Crossover', 'Van', 'Station Wagon', 'Pickup Truck / Double Cab', 'MPV (Multi-Purpose Vehicle)', 'Coupe', 'Convertible']
+const fuelTypes = ['petrol', 'diesel', 'hybrid', 'electric']
 
 export function CarsFilterSidebar({ currentFilters }: FiltersProps) {
   const router = useRouter()
@@ -115,7 +115,7 @@ export function CarsFilterSidebar({ currentFilters }: FiltersProps) {
                 htmlFor={`type-${type}`}
                 className="text-sm text-gray-700 capitalize cursor-pointer"
               >
-                {type === 'suv' ? 'SUV' : type.charAt(0).toUpperCase() + type.slice(1)}
+              {type}
               </label>
             </div>
           ))}
@@ -129,8 +129,8 @@ export function CarsFilterSidebar({ currentFilters }: FiltersProps) {
         <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 block">
           Transmission
         </Label>
-        <div className="flex gap-2">
-          {['auto', 'manual'].map((t) => (
+        <div className="flex flex-wrap gap-2">
+          {['auto', 'manual', 'tiptronic'].map((t) => (
             <button
               key={t}
               onClick={() =>
@@ -168,7 +168,7 @@ export function CarsFilterSidebar({ currentFilters }: FiltersProps) {
                   : 'border-transparent hover:bg-gray-50 text-gray-600'
               }`}
             >
-              {fuel === 'electric' ? '⚡ Electric' : fuel === 'diesel' ? '🛢️ Diesel' : '⛽ Petrol'}
+              {fuel === 'electric' ? '⚡ Electric' : fuel === 'diesel' ? '🛢️ Diesel' : fuel === 'hybrid' ? '🔋 Hybrid' : '⛽ Petrol'}
             </button>
           ))}
         </div>
