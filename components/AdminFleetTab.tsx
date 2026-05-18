@@ -45,6 +45,7 @@ export function AdminFleetTab({ initialCars, brands = [], models = [] }: AdminFl
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [uploadError, setUploadError] = useState<string | null>(null)
+  const [isAvailable, setIsAvailable] = useState(true)
 
   const MAX_IMAGES = 5
   const MAX_FILE_SIZE_MB = 2
@@ -76,6 +77,7 @@ export function AdminFleetTab({ initialCars, brands = [], models = [] }: AdminFl
   function openAdd() {
     setEditingCar(null)
     setImageUrls([])
+    setIsAvailable(true)
     reset({})
     setSheetOpen(true)
   }
@@ -95,6 +97,7 @@ export function AdminFleetTab({ initialCars, brands = [], models = [] }: AdminFl
       pricePerDay: car.price_per_day,
       description: car.description ?? '',
     })
+    setIsAvailable(car.available ?? true)
     setSheetOpen(true)
   }
 
@@ -179,9 +182,9 @@ export function AdminFleetTab({ initialCars, brands = [], models = [] }: AdminFl
     setError(null)
     let result
     if (editingCar) {
-      result = await updateCarAction(editingCar.id, { ...data, images: imageUrls, available: editingCar.available })
+      result = await updateCarAction(editingCar.id, { ...data, images: imageUrls, available: isAvailable })
     } else {
-      result = await addCarAction({ ...data, images: imageUrls })
+      result = await addCarAction({ ...data, images: imageUrls, available: isAvailable })
     }
     if (result?.error) {
       setError(result.error)
@@ -385,15 +388,32 @@ export function AdminFleetTab({ initialCars, brands = [], models = [] }: AdminFl
                 </div>
               </div>
 
-              <div>
-                <Label htmlFor="pricePerDay">Price per Day (LKR)</Label>
-                <Input
-                  id="pricePerDay"
-                  type="number"
-                  className="mt-1"
-                  {...register('pricePerDay', { valueAsNumber: true })}
-                />
-                {errors.pricePerDay && <p className="text-xs text-red-500 mt-1">{errors.pricePerDay.message}</p>}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="pricePerDay">Price per Day (LKR)</Label>
+                  <Input
+                    id="pricePerDay"
+                    type="number"
+                    className="mt-1"
+                    {...register('pricePerDay', { valueAsNumber: true })}
+                  />
+                  {errors.pricePerDay && <p className="text-xs text-red-500 mt-1">{errors.pricePerDay.message}</p>}
+                </div>
+                <div>
+                  <Label>Status</Label>
+                  <Select 
+                    value={isAvailable ? 'available' : 'unavailable'} 
+                    onValueChange={(val) => setIsAvailable(val === 'available')}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Select Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="available">Available</SelectItem>
+                      <SelectItem value="unavailable">Unavailable</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               <div>

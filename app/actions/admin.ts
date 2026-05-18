@@ -15,7 +15,7 @@ async function isAdmin(): Promise<boolean> {
   return profile?.role === 'admin'
 }
 
-export async function addCarAction(payload: CarInput & { images: string[] }) {
+export async function addCarAction(payload: CarInput & { images: string[]; available?: boolean }) {
   const parsed = CarSchema.safeParse(payload)
   if (!parsed.success) return { error: parsed.error.issues[0].message }
   if (!(await isAdmin())) return { error: 'Unauthorized' }
@@ -33,7 +33,7 @@ export async function addCarAction(payload: CarInput & { images: string[] }) {
     price_per_day: parsed.data.pricePerDay,
     description: parsed.data.description ?? null,
     images: payload.images,
-    available: true,
+    available: payload.available ?? true,
   })
   if (error) return { error: error.message }
 
