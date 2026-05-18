@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { CarSchema } from '@/lib/validations'
 import type { CarInput } from '@/lib/validations'
 import type { Profile } from '@/types/supabase'
@@ -97,7 +98,13 @@ export async function deleteCarAction(carId: string) {
     }).filter(Boolean) as string[]
 
     if (filePaths.length > 0) {
-      await supabase.storage.from('cars').remove(filePaths)
+      const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
+      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+      const adminSupabase = createServiceClient(url, serviceKey, {
+        auth: { persistSession: false },
+      })
+      
+      await adminSupabase.storage.from('cars').remove(filePaths)
     }
   }
 
