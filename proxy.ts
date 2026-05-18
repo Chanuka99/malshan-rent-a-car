@@ -2,13 +2,13 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import type { Database } from '@/types/supabase'
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   if (!supabaseUrl || !supabaseAnonKey) {
     console.error(
-      'Supabase middleware skipped: missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY'
+      'Supabase proxy skipped: missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY'
     )
 
     const { pathname } = request.nextUrl
@@ -46,12 +46,10 @@ export async function middleware(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser()
 
-    // Protect /dashboard — requires authenticated user
     if (pathname.startsWith('/dashboard') && !user) {
       return NextResponse.redirect(new URL('/auth/login', request.url))
     }
 
-    // Protect /admin — requires authenticated user with role === 'admin'
     if (pathname.startsWith('/admin')) {
       if (!user) {
         return NextResponse.redirect(new URL('/auth/login', request.url))
@@ -69,7 +67,7 @@ export async function middleware(request: NextRequest) {
       }
     }
   } catch (error) {
-    console.error('Supabase middleware auth error:', error)
+    console.error('Supabase proxy auth error:', error)
   }
 
   return supabaseResponse
