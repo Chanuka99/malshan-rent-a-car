@@ -51,7 +51,7 @@ export default async function CarsPage({ searchParams }: CarsPageProps) {
   }
 
   if (params.fuelType) {
-    query = query.eq('fuel_type', params.fuelType as 'petrol' | 'diesel' | 'electric')
+    query = query.eq('fuel_type', params.fuelType as 'petrol' | 'diesel' | 'electric' | 'hybrid')
   }
 
   if (params.seats) {

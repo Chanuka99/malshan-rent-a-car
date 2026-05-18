@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS cars (
   type TEXT NOT NULL CHECK (type IN ('economy', 'suv', 'luxury', 'van')),
   seats INT NOT NULL,
   transmission TEXT NOT NULL CHECK (transmission IN ('auto', 'manual')),
-  fuel_type TEXT NOT NULL CHECK (fuel_type IN ('petrol', 'diesel', 'electric')),
+  fuel_type TEXT NOT NULL CHECK (fuel_type IN ('petrol', 'diesel', 'electric', 'hybrid')),
   price_per_day NUMERIC NOT NULL,
   images TEXT[] NOT NULL DEFAULT '{}',
   available BOOLEAN NOT NULL DEFAULT true,
