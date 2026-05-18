@@ -28,13 +28,15 @@ import { CarSchema, type CarInput } from '@/lib/validations'
 import { addCarAction, updateCarAction, deleteCarAction } from '@/app/actions/admin'
 import { formatCurrency } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
-import type { Car } from '@/types/supabase'
+import type { Car, Brand, Model } from '@/types/supabase'
 
 interface AdminFleetTabProps {
   initialCars: Car[]
+  brands?: Brand[]
+  models?: Model[]
 }
 
-export function AdminFleetTab({ initialCars }: AdminFleetTabProps) {
+export function AdminFleetTab({ initialCars, brands = [], models = [] }: AdminFleetTabProps) {
   const [cars, setCars] = useState<Car[]>(initialCars)
   const [editingCar, setEditingCar] = useState<Car | null>(null)
   const [sheetOpen, setSheetOpen] = useState(false)
@@ -55,10 +57,21 @@ export function AdminFleetTab({ initialCars }: AdminFleetTabProps) {
     control,
     reset,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<CarInput>({ resolver: zodResolver(CarSchema) })
 
   const carName = watch('name')
+  const selectedBrandName = watch('brand')
+  
+  const currentYear = new Date().getFullYear()
+  const years = Array.from({ length: currentYear - 2000 + 1 }, (_, i) => currentYear - i)
+  const seats = Array.from({ length: 15 }, (_, i) => i + 1)
+  
+  const selectedBrand = brands.find(b => b.name === selectedBrandName)
+  const availableModels = selectedBrand 
+    ? models.filter(m => m.brand_id === selectedBrand.id)
+    : []
 
   function openAdd() {
     setEditingCar(null)
@@ -214,24 +227,74 @@ export function AdminFleetTab({ initialCars }: AdminFleetTabProps) {
                   {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>}
                 </div>
                 <div>
-                  <Label htmlFor="brand">Brand</Label>
-                  <Input id="brand" className="mt-1" {...register('brand')} />
+                  <Label>Brand</Label>
+                  <Controller
+                    control={control}
+                    name="brand"
+                    render={({ field }) => (
+                      <Select onValueChange={(val) => {
+                        field.onChange(val)
+                        // Reset model when brand changes
+                        setValue('model', '')
+                      }} value={field.value}>
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Select brand" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {brands.map(b => (
+                            <SelectItem key={b.id} value={b.name}>{b.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  {errors.brand && <p className="text-xs text-red-500 mt-1">{errors.brand.message}</p>}
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label htmlFor="model">Model</Label>
-                  <Input id="model" className="mt-1" {...register('model')} />
+                  <Label>Model</Label>
+                  <Controller
+                    control={control}
+                    name="model"
+                    render={({ field }) => (
+                      <Select onValueChange={field.onChange} value={field.value} disabled={!selectedBrandName}>
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Select model" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableModels.map(m => (
+                            <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  {errors.model && <p className="text-xs text-red-500 mt-1">{errors.model.message}</p>}
                 </div>
                 <div>
-                  <Label htmlFor="year">Year</Label>
-                  <Input
-                    id="year"
-                    type="number"
-                    className="mt-1"
-                    {...register('year', { valueAsNumber: true })}
+                  <Label>Year</Label>
+                  <Controller
+                    control={control}
+                    name="year"
+                    render={({ field }) => (
+                      <Select 
+                        onValueChange={(val) => field.onChange(parseInt(val as string))} 
+                        value={field.value?.toString()}
+                      >
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Select year" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {years.map(y => (
+                            <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
                   />
+                  {errors.year && <p className="text-xs text-red-500 mt-1">{errors.year.message}</p>}
                 </div>
               </div>
 
@@ -257,13 +320,27 @@ export function AdminFleetTab({ initialCars }: AdminFleetTabProps) {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="seats">Seats</Label>
-                  <Input
-                    id="seats"
-                    type="number"
-                    className="mt-1"
-                    {...register('seats', { valueAsNumber: true })}
+                  <Label>Seats</Label>
+                  <Controller
+                    control={control}
+                    name="seats"
+                    render={({ field }) => (
+                      <Select 
+                        onValueChange={(val) => field.onChange(parseInt(val as string))} 
+                        value={field.value?.toString()}
+                      >
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Select seats" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {seats.map(s => (
+                            <SelectItem key={s} value={s.toString()}>{s}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
                   />
+                  {errors.seats && <p className="text-xs text-red-500 mt-1">{errors.seats.message}</p>}
                 </div>
               </div>
 
@@ -299,6 +376,7 @@ export function AdminFleetTab({ initialCars }: AdminFleetTabProps) {
                         <SelectContent>
                           <SelectItem value="petrol">Petrol</SelectItem>
                           <SelectItem value="diesel">Diesel</SelectItem>
+                          <SelectItem value="hybrid">Hybrid</SelectItem>
                           <SelectItem value="electric">Electric</SelectItem>
                         </SelectContent>
                       </Select>

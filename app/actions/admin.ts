@@ -144,4 +144,38 @@ export async function updateBookingStatusAction(
   return { success: true }
 }
 
+export async function addBrandAction(name: string) {
+  if (!(await isAdmin())) return { error: 'Unauthorized' }
+  const supabase = await createClient()
+  const { error } = await supabase.from('brands').insert({ name })
+  if (error) return { error: error.message }
+  revalidatePath('/admin')
+  return { success: true }
+}
 
+export async function deleteBrandAction(id: string) {
+  if (!(await isAdmin())) return { error: 'Unauthorized' }
+  const supabase = await createClient()
+  const { error } = await supabase.from('brands').delete().eq('id', id)
+  if (error) return { error: error.message }
+  revalidatePath('/admin')
+  return { success: true }
+}
+
+export async function addModelAction(brand_id: string, name: string) {
+  if (!(await isAdmin())) return { error: 'Unauthorized' }
+  const supabase = await createClient()
+  const { error } = await supabase.from('models').insert({ brand_id, name })
+  if (error) return { error: error.message }
+  revalidatePath('/admin')
+  return { success: true }
+}
+
+export async function deleteModelAction(id: string) {
+  if (!(await isAdmin())) return { error: 'Unauthorized' }
+  const supabase = await createClient()
+  const { error } = await supabase.from('models').delete().eq('id', id)
+  if (error) return { error: error.message }
+  revalidatePath('/admin')
+  return { success: true }
+}

@@ -4,9 +4,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { AdminBookingsTable } from '@/components/AdminBookingsTable'
 import { AdminFleetTab } from '@/components/AdminFleetTab'
 import { AdminUsersTab } from '@/components/AdminUsersTab'
-import { BarChart3, Car, Users, CalendarCheck } from 'lucide-react'
+import { AdminBrandsTab } from '@/components/AdminBrandsTab'
+import { BarChart3, Car, Users, CalendarCheck, Tags } from 'lucide-react'
 import type { Metadata } from 'next'
-import type { Profile, Car as CarType, Booking } from '@/types/supabase'
+import type { Profile, Car as CarType, Booking, Brand, Model } from '@/types/supabase'
 
 export const metadata: Metadata = {
   title: 'Admin Dashboard',
@@ -34,18 +35,22 @@ export default async function AdminPage() {
   if (!profile || profile.role !== 'admin') redirect('/')
 
   // Fetch all data
-  const [{ data: carsData }, { data: bookingsData }, { data: profilesData }] = await Promise.all([
+  const [{ data: carsData }, { data: bookingsData }, { data: profilesData }, { data: brandsData }, { data: modelsData }] = await Promise.all([
     supabase.from('cars').select('*').order('created_at', { ascending: false }),
     supabase
       .from('bookings')
       .select('*, cars(name), profiles(full_name)')
       .order('created_at', { ascending: false }),
     supabase.from('profiles').select('*').order('created_at', { ascending: false }),
+    supabase.from('brands').select('*').order('name', { ascending: true }),
+    supabase.from('models').select('*').order('name', { ascending: true }),
   ])
 
   const cars = (carsData ?? []) as CarType[]
   const bookings = (bookingsData ?? []) as unknown as BookingWithJoins[]
   const profiles = (profilesData ?? []) as Profile[]
+  const brands = (brandsData ?? []) as Brand[]
+  const models = (modelsData ?? []) as Model[]
 
   const stats = [
     { label: 'Total Cars', value: cars.length, Icon: Car, color: 'bg-blue-50 text-blue-600' },
@@ -99,10 +104,13 @@ export default async function AdminPage() {
             <TabsTrigger value="users" className="flex items-center gap-1.5">
               <Users size={16} /> Users ({profiles.length})
             </TabsTrigger>
+            <TabsTrigger value="brands" className="flex items-center gap-1.5">
+              <Tags size={16} /> Brands
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="fleet">
-            <AdminFleetTab initialCars={cars} />
+            <AdminFleetTab initialCars={cars} brands={brands} models={models} />
           </TabsContent>
 
           <TabsContent value="bookings">
@@ -111,6 +119,10 @@ export default async function AdminPage() {
 
           <TabsContent value="users">
             <AdminUsersTab users={profiles} />
+          </TabsContent>
+
+          <TabsContent value="brands">
+            <AdminBrandsTab brands={brands} models={models} />
           </TabsContent>
         </Tabs>
       </div>

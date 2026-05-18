@@ -9,6 +9,52 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      brands: {
+        Row: {
+          id: string
+          name: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      models: {
+        Row: {
+          id: string
+          brand_id: string
+          name: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          brand_id: string
+          name: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          brand_id?: string
+          name?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "models_brand_id_fkey"
+            columns: ["brand_id"]
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       profiles: {
         Row: {
           id: string
@@ -43,7 +89,7 @@ export type Database = {
           type: 'economy' | 'suv' | 'luxury' | 'van'
           seats: number
           transmission: 'auto' | 'manual'
-          fuel_type: 'petrol' | 'diesel' | 'electric'
+          fuel_type: 'petrol' | 'diesel' | 'hybrid' | 'electric'
           price_per_day: number
           images: string[]
           available: boolean
@@ -59,7 +105,7 @@ export type Database = {
           type: 'economy' | 'suv' | 'luxury' | 'van'
           seats: number
           transmission: 'auto' | 'manual'
-          fuel_type: 'petrol' | 'diesel' | 'electric'
+          fuel_type: 'petrol' | 'diesel' | 'hybrid' | 'electric'
           price_per_day: number
           images?: string[]
           available?: boolean
@@ -75,7 +121,7 @@ export type Database = {
           type?: 'economy' | 'suv' | 'luxury' | 'van'
           seats?: number
           transmission?: 'auto' | 'manual'
-          fuel_type?: 'petrol' | 'diesel' | 'electric'
+          fuel_type?: 'petrol' | 'diesel' | 'hybrid' | 'electric'
           price_per_day?: number
           images?: string[]
           available?: boolean
@@ -139,5 +185,7 @@ export type Database = {
 export type Profile = Database['public']['Tables']['profiles']['Row']
 export type Car = Database['public']['Tables']['cars']['Row']
 export type Booking = Database['public']['Tables']['bookings']['Row']
+export type Brand = Database['public']['Tables']['brands']['Row']
+export type Model = Database['public']['Tables']['models']['Row']
 export type CarInsert = Database['public']['Tables']['cars']['Insert']
 export type BookingInsert = Database['public']['Tables']['bookings']['Insert']
