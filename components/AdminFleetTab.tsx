@@ -102,57 +102,72 @@ export function AdminFleetTab({ initialCars, brands = [], models = [] }: AdminFl
   }
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const files = Array.from(e.target.files || [])
+    if (files.length === 0) return
     setUploadError(null)
 
-    // Validate max images
-    if (imageUrls.length >= MAX_IMAGES) {
-      setUploadError(`Maximum ${MAX_IMAGES} images allowed.`)
+    // Validate max images combined
+    if (imageUrls.length + files.length > MAX_IMAGES) {
+      setUploadError(`Maximum ${MAX_IMAGES} images allowed in total.`)
       e.target.value = ''
       return
     }
 
-    // Validate file size
-    if (file.size > MAX_FILE_SIZE) {
-      setUploadError(`File too large. Maximum size is ${MAX_FILE_SIZE_MB} MB.`)
-      e.target.value = ''
-      return
-    }
-
-    // Validate file type
+    // Validate files
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
-    if (!allowedTypes.includes(file.type)) {
-      setUploadError('Only JPG, PNG, and WebP images are allowed.')
-      e.target.value = ''
-      return
+    for (const file of files) {
+      if (file.size > MAX_FILE_SIZE) {
+        setUploadError(`File ${file.name} is too large. Maximum size is ${MAX_FILE_SIZE_MB} MB.`)
+        e.target.value = ''
+        return
+      }
+      if (!allowedTypes.includes(file.type)) {
+        setUploadError(`File ${file.name} is an invalid type. Only JPG, PNG, and WebP images are allowed.`)
+        e.target.value = ''
+        return
+      }
     }
 
     setUploading(true)
     try {
-      const formData = new FormData()
-      formData.append('file', file)
-      
-      // Pass folder name based on car name or ID
-      if (editingCar) {
-        formData.append('folder', editingCar.id)
-      } else if (carName) {
-        const slug = carName.replace(/\s+/g, '-').toLowerCase().replace(/[^a-z0-9-]/g, '')
-        if (slug) formData.append('folder', slug)
-      }
+      const uploadPromises = files.map(async (file) => {
+        const formData = new FormData()
+        formData.append('file', file)
+        
+        // Pass folder name based on car name or ID
+        if (editingCar) {
+          formData.append('folder', editingCar.id)
+        } else if (carName) {
+          const slug = carName.replace(/\s+/g, '-').toLowerCase().replace(/[^a-z0-9-]/g, '')
+          if (slug) formData.append('folder', slug)
+        }
 
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        })
+        return res.json()
       })
 
-      const result = await res.json()
-
-      if (!res.ok) {
-        setUploadError(result.error || 'Upload failed.')
-      } else if (result.url) {
-        setImageUrls((prev) => [...prev, result.url])
+      const results = await Promise.all(uploadPromises)
+      
+      const newUrls: string[] = []
+      let hasError = false
+      
+      for (const result of results) {
+        if (result.error) {
+          hasError = true
+          setUploadError(result.error)
+        } else if (result.url) {
+          newUrls.push(result.url)
+        }
       }
+
+      if (newUrls.length > 0) {
+        setImageUrls((prev) => [...prev, ...newUrls])
+      }
+      if (!hasError) setUploadError(null)
+      
     } catch {
       setUploadError('Upload failed. Please try again.')
     } finally {
@@ -443,6 +458,7 @@ export function AdminFleetTab({ initialCars, brands = [], models = [] }: AdminFl
                       className="hidden"
                       id="imageUpload"
                       disabled={uploading}
+                      multiple
                     />
                     <label
                       htmlFor="imageUpload"
