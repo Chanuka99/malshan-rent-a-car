@@ -4,15 +4,15 @@ import { Car, Phone, Mail, MapPin, Globe, MessageCircle, Camera, Share2 } from '
 
 const footerLinks = {
   Company: [
-    { label: 'About Us', href: '/#about' },
+    { label: 'About Us', href: '/about' },
     { label: 'Our Fleet', href: '/cars' },
-    { label: 'Deals & Offers', href: '/#deals' },
-    { label: 'Contact', href: '/#contact' },
+    { label: 'Contact Us', href: '/contact' },
+    { label: 'FAQs', href: '/contact#faq' },
   ],
   Support: [
     { label: 'Book a Car', href: '/cars' },
     { label: 'My Bookings', href: '/dashboard' },
-    { label: 'FAQ', href: '/#faq' },
+    { label: 'How It Works', href: '/about' },
     { label: 'Terms & Conditions', href: '/terms' },
   ],
 }

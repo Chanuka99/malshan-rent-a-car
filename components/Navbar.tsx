@@ -26,6 +26,8 @@ interface NavbarProps {
 const navLinks = [
   { href: '/', label: 'Home' },
   { href: '/cars', label: 'Our Fleet' },
+  { href: '/about', label: 'About Us' },
+  { href: '/contact', label: 'Contact Us' },
 ]
 
 export function Navbar({ user, profile }: NavbarProps) {
