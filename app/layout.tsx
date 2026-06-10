@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { Navbar } from '@/components/Navbar'
 import { Footer } from '@/components/Footer'
+import WhatsAppButton from '@/components/WhatsAppButton'
 import { createClient } from '@/lib/supabase/server'
 
 const inter = Inter({
@@ -52,6 +53,7 @@ export default async function RootLayout({
         <Navbar user={user} profile={profile} />
         <main className="min-h-screen">{children}</main>
         <Footer />
+        <WhatsAppButton />
       </body>
     </html>
   )

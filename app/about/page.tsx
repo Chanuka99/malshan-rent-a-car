@@ -78,8 +78,8 @@ export default function AboutPage() {
             </div>
             <div className="relative h-96 rounded-lg overflow-hidden shadow-xl">
               <Image
-                src="https://images.unsplash.com/photo-1559628595-46531173cf16?w=600&q=80"
-                alt="Malshan Rent A Car office"
+                src="https://images.pexels.com/photos/3807517/pexels-photo-3807517.jpeg?auto=compress&cs=tinysrgb&w=600"
+                alt="Malshan Rent A Car office and fleet"
                 fill
                 className="object-cover"
               />
