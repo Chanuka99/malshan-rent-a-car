@@ -14,6 +14,7 @@ const footerLinks = {
     { label: 'My Bookings', href: '/dashboard' },
     { label: 'How It Works', href: '/about' },
     { label: 'Terms & Conditions', href: '/terms' },
+    { label: 'Privacy Policy', href: '/privacy' },
   ],
 }
 
