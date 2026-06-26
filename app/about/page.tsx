@@ -35,7 +35,7 @@ export default function AboutPage() {
       description: 'Passionate about delivering exceptional car rental experiences in Colombo.',
     },
     {
-      name: 'Lakmal',
+      name: 'Amal',
       role: 'Operations Manager',
       description: 'Ensures every booking runs smoothly with attention to detail.',
     },
