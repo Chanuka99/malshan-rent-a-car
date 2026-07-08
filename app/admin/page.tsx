@@ -61,7 +61,7 @@ export default async function AdminPage() {
       Icon: BarChart3,
       color: 'bg-yellow-50 text-yellow-600',
     },
-    { label: 'Total Users', value: profiles.length, Icon: Users, color: 'bg-purple-50 text-purple-600' },
+    { label: 'Total Users', value: profiles.length, Icon: Users, color: 'bg-blue-50 text-blue-600' },
   ]
 
   return (

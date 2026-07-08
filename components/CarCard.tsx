@@ -18,7 +18,7 @@ const typeColors: Record<string, string> = {
   'Station Wagon': 'bg-teal-100 text-teal-700',
   'Pickup Truck / Double Cab': 'bg-yellow-100 text-yellow-700',
   'MPV (Multi-Purpose Vehicle)': 'bg-pink-100 text-pink-700',
-  Coupe: 'bg-purple-100 text-purple-700',
+  Coupe: 'bg-cyan-100 text-cyan-700',
   Convertible: 'bg-red-100 text-red-700',
 }
 
@@ -114,7 +114,7 @@ export function CarCard({ car }: CarCardProps) {
           <span
             className={`inline-flex items-center justify-center rounded-lg px-4 h-10 text-sm font-semibold transition-all ${
               car.available
-                ? 'bg-brand text-white group-hover:shadow-lg group-hover:shadow-[0_10px_20px_rgba(86,50,201,0.4)] group-hover:-translate-y-0.5'
+                ? 'bg-brand text-white group-hover:shadow-lg group-hover:shadow-[0_10px_20px_rgba(204,0,0,0.4)] group-hover:-translate-y-0.5'
                 : 'bg-gray-200 text-gray-500'
             }`}
           >

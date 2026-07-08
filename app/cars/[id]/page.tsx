@@ -143,7 +143,7 @@ export default async function CarDetailPage({ params }: CarDetailPageProps) {
               {/* Price */}
               <p className="text-sm text-gray-500 mb-1">Starting from</p>
               <div className="flex items-end gap-2 mb-5">
-                <span className="text-4xl font-black text-gradient">
+                <span className="text-4xl font-black text-brand">
                   {formatCurrency(car.price_per_day)}
                 </span>
                 <span className="text-gray-400 mb-1">/ day</span>

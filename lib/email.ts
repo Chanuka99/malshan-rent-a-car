@@ -40,7 +40,7 @@ export async function sendBookingConfirmationEmail(data: BookingEmailData) {
         <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;">
           <!-- Header -->
           <tr>
-            <td style="background:#5632C9;padding:32px 40px;">
+            <td style="background:#CC0000;padding:32px 40px;">
               <h1 style="margin:0;color:#ffffff;font-size:28px;font-weight:700;letter-spacing:-0.5px;">Malshan Rent A Car</h1>
               <p style="margin:4px 0 0;color:rgba(255,255,255,0.8);font-size:14px;">Car Rental Colombo</p>
             </td>
@@ -52,9 +52,9 @@ export async function sendBookingConfirmationEmail(data: BookingEmailData) {
               <p style="margin:0 0 32px;color:#555;font-size:16px;">Hi ${driverName}, your car rental booking has been received successfully.</p>
 
               <!-- Booking Reference -->
-              <div style="background:#f1edfb;border-left:4px solid #5632C9;padding:16px 20px;border-radius:4px;margin-bottom:32px;">
+              <div style="background:#fef2f2;border-left:4px solid #CC0000;padding:16px 20px;border-radius:4px;margin-bottom:32px;">
                 <p style="margin:0;font-size:12px;color:#888;text-transform:uppercase;letter-spacing:1px;">Booking Reference</p>
-                <p style="margin:4px 0 0;font-size:20px;font-weight:700;color:#5632C9;font-family:monospace;">${bookingId.toUpperCase().slice(0, 8)}</p>
+                <p style="margin:4px 0 0;font-size:20px;font-weight:700;color:#CC0000;font-family:monospace;">${bookingId.toUpperCase().slice(0, 8)}</p>
               </div>
 
               <!-- Details Table -->
@@ -81,7 +81,7 @@ export async function sendBookingConfirmationEmail(data: BookingEmailData) {
                 </tr>
                 <tr>
                   <td style="padding:14px 16px;font-size:14px;color:#555;">Total Amount</td>
-                  <td style="padding:14px 16px;font-size:16px;color:#5632C9;font-weight:700;">LKR ${totalPrice.toLocaleString()}</td>
+                  <td style="padding:14px 16px;font-size:16px;color:#CC0000;font-weight:700;">LKR ${totalPrice.toLocaleString()}</td>
                 </tr>
               </table>
 
@@ -92,7 +92,7 @@ export async function sendBookingConfirmationEmail(data: BookingEmailData) {
               </div>
 
               <!-- Contact -->
-              <p style="color:#555;font-size:14px;line-height:1.6;">Questions? Contact us at <a href="mailto:hello@malshanrentacar.lk" style="color:#5632C9;text-decoration:none;">hello@malshanrentacar.lk</a> or call <strong>+94 11 234 5678</strong>.</p>
+              <p style="color:#555;font-size:14px;line-height:1.6;">Questions? Contact us at <a href="mailto:hello@malshanrentacar.lk" style="color:#CC0000;text-decoration:none;">hello@malshanrentacar.lk</a> or call <strong>+94 11 234 5678</strong>.</p>
             </td>
           </tr>
           <!-- Footer -->
