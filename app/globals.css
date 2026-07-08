@@ -47,10 +47,10 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
 
-  /* DriveEase brand */
-  --color-brand: #CC0000;
-  --color-brand-dark: #a30000;
-  --color-brand-light: #fef2f2;
+  /* Brand (Udrive-inspired) */
+  --color-brand: #5632C9;
+  --color-brand-dark: #4324a0;
+  --color-brand-light: #f1edfb;
 }
 
 :root {
@@ -60,7 +60,7 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: #CC0000;
+  --primary: #5632C9;
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -71,7 +71,7 @@
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: #CC0000;
+  --ring: #5632C9;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -80,12 +80,12 @@
   --radius: 0.5rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: #CC0000;
+  --sidebar-primary: #5632C9;
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: #CC0000;
+  --sidebar-ring: #5632C9;
 }
 
 @layer base {
@@ -108,33 +108,44 @@
 
 @layer utilities {
   .text-brand {
-    color: #CC0000;
+    color: #5632C9;
   }
   .bg-brand {
-    background-color: #CC0000;
+    background-color: #5632C9;
   }
   .bg-brand-dark {
-    background-color: #a30000;
+    background-color: #4324a0;
   }
   .bg-brand-light {
-    background-color: #fef2f2;
+    background-color: #f1edfb;
   }
   .border-brand {
-    border-color: #CC0000;
+    border-color: #5632C9;
   }
   .hover\:bg-brand-dark:hover {
-    background-color: #a30000;
+    background-color: #4324a0;
   }
   .ring-brand {
-    --tw-ring-color: #CC0000;
+    --tw-ring-color: #5632C9;
+  }
+  /* Udrive signature gradient (magenta -> blue) */
+  .text-gradient {
+    background: linear-gradient(-75deg, #EA61E5 0%, #3862C8 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+  .bg-brand-gradient {
+    background-image: linear-gradient(-75deg, #EA61E5 0%, #3862C8 100%);
   }
   .btn-brand {
-    @apply bg-brand text-white font-semibold px-6 py-3 rounded-md transition-all duration-200;
+    @apply bg-brand text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200;
   }
   .btn-brand:hover {
-    background-color: #a30000;
+    background-color: #4324a0;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(204, 0, 0, 0.3);
+    box-shadow: 0 4px 12px rgba(86, 50, 201, 0.3);
   }
   .card-hover {
     @apply transition-all duration-200;

@@ -45,7 +45,7 @@ export default async function HomePage() {
               <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold leading-tight mb-6 tracking-tight">
                 Drive Your Way
                 <br />
-                <span className="text-brand">Through Colombo</span>
+                <span className="text-gradient">Through Colombo</span>
               </h1>
               <p className="text-base sm:text-lg text-white/80 leading-relaxed mb-8 max-w-lg mx-auto lg:mx-0">
                 Premium vehicles, transparent pricing, and seamless booking. Experience
@@ -192,7 +192,7 @@ export default async function HomePage() {
                   Premium Experience
                 </div>
                 <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
-                  Your Journey, Our <span className="text-brand">Commitment</span>
+                  Your Journey, Our <span className="text-gradient">Commitment</span>
                 </h2>
                 <p className="text-gray-400 text-lg max-w-md">
                   Experience the ultimate in vehicle rental. From luxury sedans to spacious SUVs,

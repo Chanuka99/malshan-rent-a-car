@@ -2,7 +2,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Users, Zap, Settings2, Star } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { formatCurrency, getCarTypeLabel } from '@/lib/utils'
 import type { Car } from '@/types/supabase'
@@ -35,7 +34,8 @@ export function CarCard({ car }: CarCardProps) {
     'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=800&q=80'
 
   return (
-    <Card className="group overflow-hidden border border-gray-100 card-hover shadow-sm">
+    <Link href={`/cars/${car.id}`} className="block group">
+      <Card className="overflow-hidden border border-gray-100 card-hover shadow-sm">
       {/* Image */}
       <div className="relative h-48 sm:h-52 overflow-hidden bg-gray-100">
         <Image
@@ -78,7 +78,7 @@ export function CarCard({ car }: CarCardProps) {
             >
               {getCarTypeLabel(car.type)}
             </Badge>
-            <h3 className="font-bold text-gray-900 text-lg leading-tight group-hover:text-brand transition-colors">
+            <h3 className="font-bold text-gray-900 text-lg leading-tight underline decoration-transparent decoration-2 underline-offset-4 transition-all group-hover:decoration-gray-900">
               {car.name}
             </h3>
             <p className="text-sm text-gray-500">
@@ -111,18 +111,18 @@ export function CarCard({ car }: CarCardProps) {
             </span>
             <span className="text-xs text-gray-400 ml-1">/ day</span>
           </div>
-          <Button
-            size="sm"
-            className="bg-brand hover:bg-brand-dark text-white font-semibold"
-            disabled={!car.available}
-            render={
-              <Link href={car.available ? `/cars/${car.id}` : '#'}>
-                {car.available ? 'Book Now' : 'Unavailable'}
-              </Link>
-            }
-          />
+          <span
+            className={`inline-flex items-center justify-center rounded-lg px-4 h-10 text-sm font-semibold transition-all ${
+              car.available
+                ? 'bg-brand text-white group-hover:shadow-lg group-hover:shadow-[0_10px_20px_rgba(86,50,201,0.4)] group-hover:-translate-y-0.5'
+                : 'bg-gray-200 text-gray-500'
+            }`}
+          >
+            {car.available ? 'Book Now' : 'Unavailable'}
+          </span>
         </div>
       </CardContent>
     </Card>
+    </Link>
   )
 }

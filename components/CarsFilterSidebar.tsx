@@ -16,6 +16,7 @@ interface FiltersProps {
     fuelType?: string
     seats?: string
     maxPrice?: string
+    status?: string
     pickup?: string
     dropoff?: string
   }
@@ -93,6 +94,35 @@ export function CarsFilterSidebar({ currentFilters }: FiltersProps) {
           <RotateCcw size={12} />
           Clear
         </button>
+      </div>
+
+      <Separator className="mb-5" />
+
+      {/* Availability Status */}
+      <div className="mb-6">
+        <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 block">
+          Status
+        </Label>
+        <div className="flex flex-wrap gap-2">
+          {[
+            { value: 'available', label: 'Available' },
+            { value: 'unavailable', label: 'Unavailable' },
+          ].map((s) => (
+            <button
+              key={s.value}
+              onClick={() =>
+                updateFilter('status', currentFilters.status === s.value ? null : s.value)
+              }
+              className={`flex-1 py-2 text-sm font-medium rounded-lg border transition-all ${
+                currentFilters.status === s.value
+                  ? 'bg-brand border-brand text-white'
+                  : 'bg-white border-gray-200 text-gray-600 hover:border-brand hover:text-brand'
+              }`}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <Separator className="mb-5" />

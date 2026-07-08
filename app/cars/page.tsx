@@ -24,6 +24,7 @@ interface CarsPageProps {
     fuelType?: string
     seats?: string
     maxPrice?: string
+    status?: string
     pickup?: string
     dropoff?: string
   }>
@@ -60,6 +61,10 @@ export default async function CarsPage({ searchParams }: CarsPageProps) {
 
   if (params.maxPrice) {
     query = query.lte('price_per_day', parseInt(params.maxPrice))
+  }
+
+  if (params.status) {
+    query = query.eq('available', params.status === 'available')
   }
 
   const { data: cars } = await query
