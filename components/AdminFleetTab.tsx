@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { ArrowLeft, ArrowRight, Plus, Pencil, Trash2, Car as CarIcon } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Plus, Pencil, Trash2, Car as CarIcon, Ban } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -25,7 +25,7 @@ import {
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { CarSchema, type CarInput } from '@/lib/validations'
-import { addCarAction, updateCarAction, deleteCarAction } from '@/app/actions/admin'
+import { addCarAction, updateCarAction, deleteCarAction, setAllCarsUnavailableAction } from '@/app/actions/admin'
 import { formatCurrency } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
 import type { Car, Brand, Model } from '@/types/supabase'
@@ -46,6 +46,7 @@ export function AdminFleetTab({ initialCars, brands = [], models = [] }: AdminFl
   const [error, setError] = useState<string | null>(null)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [isAvailable, setIsAvailable] = useState(true)
+  const [settingAllUnavailable, setSettingAllUnavailable] = useState(false)
 
   const MAX_IMAGES = 5
   const MAX_FILE_SIZE_MB = 2
@@ -202,6 +203,20 @@ export function AdminFleetTab({ initialCars, brands = [], models = [] }: AdminFl
     })
   }
 
+  async function handleSetAllUnavailable() {
+    if (!confirm('Are you sure you want to set ALL cars as unavailable?')) return
+    setSettingAllUnavailable(true)
+    setError(null)
+    const result = await setAllCarsUnavailableAction()
+    if (result?.error) {
+      setError(result.error)
+    } else {
+      setCars((prev) => prev.map((c) => ({ ...c, available: false })))
+      router.refresh()
+    }
+    setSettingAllUnavailable(false)
+  }
+
   async function onSubmit(data: CarInput) {
     setSubmitting(true)
     setError(null)
@@ -230,7 +245,21 @@ export function AdminFleetTab({ initialCars, brands = [], models = [] }: AdminFl
     <div>
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-bold text-gray-900">Fleet Management</h2>
-        <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 flex items-center gap-2"
+            onClick={handleSetAllUnavailable}
+            disabled={settingAllUnavailable}
+          >
+            {settingAllUnavailable ? (
+              <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Ban size={16} />
+            )}
+            Set All Unavailable
+          </Button>
+          <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
           <SheetTrigger
             render={
               <Button
@@ -552,7 +581,10 @@ export function AdminFleetTab({ initialCars, brands = [], models = [] }: AdminFl
             </form>
           </SheetContent>
         </Sheet>
+        </div>
       </div>
+
+      {error && <p className="text-sm text-red-500 mb-4">{error}</p>}
 
       <div className="overflow-x-auto rounded-xl border border-gray-200">
         <table className="w-full text-sm">

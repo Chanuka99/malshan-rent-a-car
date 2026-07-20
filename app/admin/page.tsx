@@ -39,7 +39,7 @@ export default async function AdminPage() {
     supabase.from('cars').select('*').order('created_at', { ascending: false }),
     supabase
       .from('bookings')
-      .select('*, cars(name), profiles(full_name)')
+      .select('*, cars(name), profiles(full_name, phone)')
       .order('created_at', { ascending: false }),
     supabase.from('profiles').select('*').order('created_at', { ascending: false }),
     supabase.from('brands').select('*').order('name', { ascending: true }),

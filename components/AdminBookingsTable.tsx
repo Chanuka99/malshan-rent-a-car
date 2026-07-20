@@ -17,7 +17,7 @@ import { Wifi, RefreshCw } from 'lucide-react'
 
 interface BookingWithCar extends Booking {
   cars: { name: string } | null
-  profiles: { full_name: string } | null
+  profiles: { full_name: string; phone: string | null } | null
 }
 
 interface AdminBookingsTableProps {
@@ -47,7 +47,7 @@ export function AdminBookingsTable({ initialBookings }: AdminBookingsTableProps)
           // Re-fetch bookings with join data on any change
           const { data } = await supabase
             .from('bookings')
-            .select('*, cars(name), profiles(full_name)')
+            .select('*, cars(name), profiles(full_name, phone)')
             .order('created_at', { ascending: false })
 
           if (data) {
@@ -99,7 +99,7 @@ export function AdminBookingsTable({ initialBookings }: AdminBookingsTableProps)
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-gray-50 border-b border-gray-200">
-              {['Ref', 'Customer', 'Vehicle', 'Pick-up', 'Drop-off', 'Days', 'Total', 'Status', 'Action'].map(
+              {['Ref', 'Customer', 'Phone', 'Vehicle', 'Pick-up', 'Drop-off', 'Days', 'Total', 'Status', 'Action'].map(
                 (h) => (
                   <th
                     key={h}
@@ -114,7 +114,7 @@ export function AdminBookingsTable({ initialBookings }: AdminBookingsTableProps)
           <tbody className="divide-y divide-gray-100">
             {bookings.length === 0 ? (
               <tr>
-                <td colSpan={9} className="text-center py-12 text-gray-400">
+                <td colSpan={10} className="text-center py-12 text-gray-400">
                   No bookings found.
                 </td>
               </tr>
@@ -129,6 +129,9 @@ export function AdminBookingsTable({ initialBookings }: AdminBookingsTableProps)
                   </td>
                   <td className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">
                     {booking.profiles?.full_name ?? '—'}
+                  </td>
+                  <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
+                    {booking.profiles?.phone ?? '—'}
                   </td>
                   <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
                     {booking.cars?.name ?? '—'}

@@ -78,6 +78,23 @@ export async function updateCarAction(
   return { success: true }
 }
 
+export async function setAllCarsUnavailableAction() {
+  if (!(await isAdmin())) return { error: 'Unauthorized' }
+
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('cars')
+    .update({ available: false })
+    .not('id', 'is', null)
+
+  if (error) return { error: error.message }
+
+  revalidatePath('/admin')
+  revalidatePath('/cars')
+  revalidatePath('/')
+  return { success: true }
+}
+
 export async function deleteCarAction(carId: string) {
   if (!(await isAdmin())) return { error: 'Unauthorized' }
 
