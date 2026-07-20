@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 
 type BookingWithJoins = Booking & {
   cars: { name: string } | null
-  profiles: { full_name: string } | null
+  profiles: { full_name: string; phone: string | null } | null
 }
 
 export default async function AdminPage() {
